@@ -1,2 +1,2 @@
 # api-server-selector
-Web Component that handles the API's Server selection
+Custom element that renders and manages Servers state in AMF powered application
