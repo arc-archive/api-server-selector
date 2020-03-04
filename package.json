@@ -1,0 +1,78 @@
+{
+  "name": "api-server-selector",
+  "version": "0.0.0",
+  "description": "Webcomponent api-server-selector following open-wc recommendations",
+  "author": "api-server-selector",
+  "license": "MIT",
+  "main": "index.js",
+  "module": "index.js",
+  "scripts": {
+    "start": "es-dev-server --app-index demo/index.html --node-resolve --open --watch",
+    "lint:eslint": "eslint --ext .js,.html . --ignore-path .gitignore",
+    "format:eslint": "eslint --ext .js,.html . --fix --ignore-path .gitignore",
+    "lint:prettier": "prettier \"**/*.js\" --check --ignore-path .gitignore",
+    "format:prettier": "prettier \"**/*.js\" --write --ignore-path .gitignore",
+    "lint": "npm run lint:eslint && npm run lint:prettier",
+    "format": "npm run format:eslint && npm run format:prettier",
+    "test": "karma start --coverage",
+    "test:watch": "karma start --auto-watch=true --single-run=false",
+    "test:update-snapshots": "karma start --update-snapshots",
+    "test:prune-snapshots": "karma start --prune-snapshots",
+    "test:bs": "karma start karma.bs.config.js --coverage",
+    "storybook": "start-storybook --node-resolve --watch --open",
+    "storybook:build": "build-storybook"
+  },
+  "dependencies": {
+    "lit-html": "^1.1.2",
+    "lit-element": "^2.2.1"
+  },
+  "devDependencies": {
+    "@advanced-rest-client/arc-demo-helper": "^1.0.17",
+    "@advanced-rest-client/eslint-config": "^1.1.4",
+    "@advanced-rest-client/oauth-authorization": "^3.0.1",
+    "@advanced-rest-client/prettier-config": "^0.1.0",
+    "@advanced-rest-client/testing-karma-sl": "^1.2.0",
+    "@anypoint-web-components/anypoint-checkbox": "^1.0.2",
+    "@api-components/api-model-generator": "^0.2.6",
+    "@api-components/api-navigation": "^4.0.4",
+    "@commitlint/cli": "^8.3.5",
+    "@commitlint/config-conventional": "^8.3.4",
+    "@open-wc/demoing-storybook": "^1.10.5",
+    "@open-wc/eslint-config": "^2.0.0",
+    "@open-wc/prettier-config": "^0.1.10",
+    "@open-wc/testing": "^2.0.0",
+    "@open-wc/testing-karma": "^3.2.43",
+    "@open-wc/testing-karma-bs": "^1.3.43",
+    "@polymer/iron-test-helpers": "^3.0.1",
+    "cryptojslib": "^3.1.2",
+    "deepmerge": "^3.2.0",
+    "es-dev-server": "^1.23.0",
+    "eslint": "^6.1.0",
+    "husky": "^1.3.1",
+    "jsrsasign": "^8.0.12",
+    "lint-staged": "^8.0.0",
+    "sinon": "^9.0.0",
+    "typescript": "^3.8.2",
+    "typescript-lit-html-plugin": "^0.9.0",
+    "web-animations-js": "^2.3.2"
+  },
+  "eslintConfig": {
+    "extends": [
+      "@open-wc/eslint-config",
+      "eslint-config-prettier"
+    ]
+  },
+  "prettier": "@open-wc/prettier-config",
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
+  "lint-staged": {
+    "*.js": [
+      "eslint --fix",
+      "prettier --write",
+      "git add"
+    ]
+  }
+}
