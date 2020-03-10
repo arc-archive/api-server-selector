@@ -23,8 +23,14 @@
     "storybook:build": "build-storybook"
   },
   "dependencies": {
-    "lit-html": "^1.1.2",
-    "lit-element": "^2.2.1"
+    "@advanced-rest-client/events-target-mixin": "^3.0.0",
+    "@anypoint-web-components/anypoint-dropdown": "^1.0.1",
+    "@anypoint-web-components/anypoint-dropdown-menu": "^0.1.14",
+    "@anypoint-web-components/anypoint-item": "^1.0.5",
+    "@anypoint-web-components/anypoint-listbox": "^1.0.4",
+    "@api-components/amf-helper-mixin": "^4.0.19",
+    "lit-element": "^2.2.1",
+    "lit-html": "^1.1.2"
   },
   "devDependencies": {
     "@advanced-rest-client/arc-demo-helper": "^1.0.17",
