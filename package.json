@@ -1,11 +1,26 @@
 {
-  "name": "api-server-selector",
+  "name": "@api-components/api-server-selector",
   "version": "0.0.0",
-  "description": "Webcomponent api-server-selector following open-wc recommendations",
-  "author": "api-server-selector",
-  "license": "MIT",
+  "description": "A component that renders OAS' servers as a dropdown option to select API server.",
+  "license": "Apache-2.0",
   "main": "index.js",
   "module": "index.js",
+  "authors": [
+    "The Advanced REST client authors <arc@mulesoft.com>"
+  ],
+  "contributors": [
+    "Pawel Psztyc",
+    "Leandro Bauret",
+    "Francisco Di Giandomenico"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/advanced-rest-client/api-server-selector.git"
+  },
+  "bugs": {
+    "url": "https://github.com/advanced-rest-client/api-server-selector/issues",
+    "email": "arc@mulesoft.com"
+  },
   "scripts": {
     "start": "es-dev-server --app-index demo/index.html --node-resolve --open --watch",
     "lint:eslint": "eslint --ext .js,.html . --ignore-path .gitignore",
