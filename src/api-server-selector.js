@@ -229,11 +229,23 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
     }
     this._selectedIndex = selectedIndex;
     this._selectedValue = selectedValue;
+    const selectedType = this._getSelectedType(selectedIndex);
     dispatchEvent(
       new CustomEvent('api-server-changed', {
-        detail: { value: selectedValue },
+        detail: { value: selectedValue, type: selectedType },
       }),
     );
+  }
+
+  _getSelectedType(selectedIndex) {
+    const serversLength = this.servers.length
+    if (selectedIndex < serversLength) {
+      return 'server';
+    } else if (selectedIndex === serversLength) {
+      return 'custom';
+    } else {
+      return 'extra';
+    }
   }
 
   /**
