@@ -59,10 +59,16 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
       _servers: { type: Array },
       _selectedIndex: { type: Number },
       _selectedValue: { type: String },
+      _selectedType: { type: String },
       _endpointId: { type: String },
       _methodId: { type: String },
       _url: { type: String },
     };
+  }
+
+  constructor() {
+    super();
+    this.handleNavigationChange = this.handleNavigationChange.bind(this);
   }
 
   get styles() {
@@ -84,6 +90,7 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
     }
 
     this._servers = value;
+    this._checkForSelectedChange(old);
   }
 
   get servers() {
@@ -137,28 +144,54 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
     return this._url || '';
   }
 
+  set url(value) {
+    const old = this._url;
+    if (value === old) {
+      return;
+    }
+    this._url = value;
+    dispatchEvent(
+      new CustomEvent('api-server-changed', {
+        detail: { value },
+      }),
+    );
+  }
+
+  set selectedType(value) {
+    const old = this._selectedType;
+    if (value === old) {
+      return;
+    }
+    this._selectedType = value;
+  }
+
+  get selectedType() {
+    return this._selectedType;
+  }
+
   handleNavigationChange(e) {
     const { selected, type, endpointId } = e.detail;
     const serverDefinitionAllowedTypes = ['endpoint', 'method'];
     if (serverDefinitionAllowedTypes.indexOf(type) === -1) {
       return;
     }
-    const oldServers = this.servers;
     this.updateServers({ id: selected, type, endpointId });
-    this._checkForSelectedChange(oldServers);
   }
 
   _checkForSelectedChange(oldServers) {
-    if (!oldServers) {
-      oldServers = [];
-    }
     if (this._selectedIndex === undefined || this._selectedIndex === null) {
       return;
+    }
+    if (!oldServers) {
+      oldServers = [];
     }
     let newIndex;
     let newValue = this._selectedValue;
     const isModelServerSelected = this._selectedIndex < oldServers.length
-    if (isModelServerSelected) {
+    if (!this.servers) {
+      newIndex = undefined;
+      newValue = undefined;
+    } else if (isModelServerSelected) {
       const indexInNewServers = this._getIndexOfServer(this._selectedValue, this.servers)
       if (indexInNewServers > -1) {
         newIndex = indexInNewServers;
@@ -176,6 +209,13 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
     this._changeSelected({ selectedIndex: newIndex, selectedValue: newValue })
   }
 
+  /**
+   * Search for a server in a list of search, comparing against AMF id
+   * 
+   * @param {String} serverId The desired server to search for
+   * @param {Array} servers The list of AMF server models to search in,
+   * @return {Number} The index of the server, or -1 if not found
+   */
   _getIndexOfServer(serverId, servers) {
     for (let i = 0; i < servers.length; i++) {
       const server = servers[i];
@@ -242,17 +282,33 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
    * @param {String} params.selectedValue The value of the selected item in the listbox
    */
   _changeSelected({ selectedIndex, selectedValue }) {
-    if (selectedIndex === this._selectedIndex && selectedValue === this._selectedValue) {
+    const oldValue = this._selectedValue;
+    if (selectedIndex === this._selectedIndex && selectedValue === oldValue) {
       return;
     }
+
+    const selectedType = this._getSelectedType(selectedIndex);
+    this._setUrl({ selectedIndex, selectedValue, selectedType });
     this._selectedIndex = selectedIndex;
     this._selectedValue = selectedValue;
-    const selectedType = this._getSelectedType(selectedIndex);
-    dispatchEvent(
-      new CustomEvent('api-server-changed', {
-        detail: { value: selectedValue, type: selectedType },
-      }),
-    );
+    this.selectedType = selectedType;
+  }
+
+  _setUrl({ selectedIndex, selectedValue, selectedType }) {
+    let url;
+    if (selectedType === 'server') {
+      url = this._getServerUrl(this.servers[selectedIndex]);
+    } else if (selectedType === 'custom') {
+      if (this.selectedType === 'custom') {
+        url = this.url;
+      } else {
+        url = '';
+      }
+    } else {
+      // `extra`
+      url = selectedValue;
+    }
+    this.url = url;
   }
 
   _getSelectedType(selectedIndex) {
@@ -342,24 +398,26 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
     const isCustom = this._getSelectedType(this._selectedIndex) === 'custom';
 
     if (isCustom) {
-      // TODO handle change of this input
       return html`
-      <anypoint-input name="url">
+      <anypoint-input @input=${this._handleUrlChange} value="${this.url}">
         <label slot="label">URL</label>
       </anypoint-input>
     `;
     }
     return html`
-    <anypoint-input disabled name="url" value="${this._getSelectedServerUrl()}">
+    <anypoint-input disabled value="${this.url}">
       <label slot="label">URL</label>
       </anypoint-input>
     `;
   }
 
-  render() {
-    // TODO
-    const { _selectedIndex } = this
+  _handleUrlChange(event) {
+    const { value } = event.target
+    this.url = value;
+  }
 
+  render() {
+    const { _selectedIndex } = this
     return html`<style>${this.styles}</style>
     <div class="container">
       <anypoint-dropdown-menu>
@@ -380,11 +438,11 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
 
   _attachListeners(node) {
     super._attachListeners(node);
-    node.addEventListener('api-navigation-selection-changed', this.handleNavigationChange.bind(this));
+    node.addEventListener('api-navigation-selection-changed', this.handleNavigationChange);
   }
 
   _detachListeners(node) {
     super._detachListeners(node);
-    node.removeEventListener('api-navigation-selection-changed', this.handleNavigationChange.bind(this));
+    node.removeEventListener('api-navigation-selection-changed', this.handleNavigationChange);
   }
 }
