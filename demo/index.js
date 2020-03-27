@@ -1,27 +1,15 @@
-import { html, LitElement } from 'lit-element';
-import { AmfHelperMixin } from '@api-components/amf-helper-mixin/amf-helper-mixin.js';
+import { html } from 'lit-element';
 import { ApiDemoPage } from '@advanced-rest-client/arc-demo-helper';
 import '@advanced-rest-client/arc-demo-helper/arc-interactive-demo.js';
 import '@anypoint-web-components/anypoint-checkbox/anypoint-checkbox.js';
 import '../api-server-selector.js';
 
-class DemoElement extends AmfHelperMixin(LitElement) {}
-window.customElements.define('demo-element', DemoElement);
-
 class DemoPage extends ApiDemoPage {
-  get helper() {
-    if (!this.__helper) {
-      this.__helper = document.getElementById('helper');
-    }
-    return this.__helper;
-  }
-
   constructor() {
     super();
     // list of properties that will trigger `render()` when changed
     this.initObservableProperties([
       'demoState',
-      'compatibility',
       'outlined',
       'extraOptions',
       'servers',
@@ -31,8 +19,6 @@ class DemoPage extends ApiDemoPage {
     this.darkThemeActive = false;
     this.demoStates = ['Filled', 'Outlined', 'Anypoint'];
     this.extraOptions = false;
-
-    this._demoStateHandler = this._demoStateHandler.bind(this);
   }
 
   _demoStateHandler(e) {
@@ -40,6 +26,7 @@ class DemoPage extends ApiDemoPage {
     this.demoState = state;
     this.outlined = state === 1;
     this.compatibility = state === 2;
+    this._updateCompatibility();
   }
 
   // overrides base method for navigation change
@@ -57,9 +44,6 @@ class DemoPage extends ApiDemoPage {
 
   setData(type, selected, endpointId) {
     // todo: extract servers definition from the AMF model for current selection.
-    // Use AMF helper used in the main template to access AMF helper's methods.
-    // Helper already has `amf` property set.
-    const helper = this.helper;
     const opts = {};
     if (type === 'method') {
       opts.methodId = selected;
@@ -68,7 +52,7 @@ class DemoPage extends ApiDemoPage {
       opts.endpointId = selected;
     }
     // the result should be set on the `servers` variable which is "observable"
-    this.servers = helper._getServers(opts);
+    this.servers = this._getServers(opts);
     console.log(this.servers);
   }
 
@@ -122,9 +106,7 @@ class DemoPage extends ApiDemoPage {
   }
 
   contentTemplate() {
-    const { amf } = this;
     return html`
-      <demo-element id="helper" .amf="${amf}"></demo-element>
       <h2>API Server Selector</h2>
       ${this._demoTemplate()}
     `;
