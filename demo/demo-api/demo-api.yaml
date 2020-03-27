@@ -64,11 +64,21 @@ paths:
         200:
           description: Successful response
   /ping:
+    servers:
+      - url: https://endpoint.example.com
+        description: Override base path servers
     get:
       servers:
         - url: https://echo.example.com
           description: Override base path for the GET /ping operation
+        - url: https://echo2.example.com
+          description: Also overrides base path for the GET /ping operation
       summary: "A get method"
       responses:
         200:
           description: Successful response
+    post:
+      summary: "A post method"
+      responses:
+        201:
+          description: Successful create

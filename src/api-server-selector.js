@@ -108,6 +108,7 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
     }
 
     this._amf = model;
+    this.updateServers({});
   }
 
   get amf() {
@@ -141,7 +142,7 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
   }
 
   get url() {
-    return this._url || '';
+    return this.baseUri || this._url || '';
   }
 
   set url(value) {
@@ -399,13 +400,13 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
 
     if (isCustom) {
       return html`
-      <anypoint-input @input=${this._handleUrlChange} value="${this.url}">
+      <anypoint-input class="url-input" @input=${this._handleUrlChange} value="${this.url}">
         <label slot="label">URL</label>
       </anypoint-input>
     `;
     }
     return html`
-    <anypoint-input disabled value="${this.url}">
+    <anypoint-input class="url-input" disabled value="${this.url}">
       <label slot="label">URL</label>
       </anypoint-input>
     `;
@@ -420,7 +421,7 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
     const { _selectedIndex } = this
     return html`<style>${this.styles}</style>
     <div class="container">
-      <anypoint-dropdown-menu>
+      <anypoint-dropdown-menu class="api-server-dropdown">
         <label slot="label">Select server</label>
         <anypoint-listbox
           .selected="${_selectedIndex}"
