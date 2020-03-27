@@ -1,6 +1,7 @@
-import { html, LitElement } from 'lit-element';
+import { html, LitElement, css } from 'lit-element';
 import { AmfHelperMixin } from '@api-components/amf-helper-mixin/amf-helper-mixin.js';
 import { EventsTargetMixin } from '@advanced-rest-client/events-target-mixin/events-target-mixin.js';
+import '@anypoint-web-components/anypoint-input/anypoint-input.js';
 
 /**
  * `api-server-selector`
@@ -60,7 +61,20 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
       _selectedValue: { type: String },
       _endpointId: { type: String },
       _methodId: { type: String },
+      _url: { type: String },
     };
+  }
+
+  get styles() {
+    return css`
+      .container {
+        display: flex
+      }
+
+      anypoint-input {
+        margin: 16px 8px;
+      }
+    `;
   }
 
   set servers(value) {
@@ -117,6 +131,10 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
     }
 
     this._endpointId = value;
+  }
+
+  get url() {
+    return this._url || '';
   }
 
   handleNavigationChange(e) {
@@ -238,7 +256,11 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
   }
 
   _getSelectedType(selectedIndex) {
-    const serversLength = this.servers.length
+    let { servers } = this
+    if (!servers) {
+      servers = []
+    }
+    const serversLength = servers.length
     if (selectedIndex < serversLength) {
       return 'server';
     } else if (selectedIndex === serversLength) {
@@ -263,13 +285,18 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
     `;
   }
 
+  _getServerUrl(server) {
+    const key = this._getAmfKey(this.ns.aml.vocabularies.core.urlTemplate);
+    return this._getValue(server, key);
+  }
+
   renderServerOptions() {
     const { servers } = this;
-    const key = this._getAmfKey(this.ns.aml.vocabularies.core.urlTemplate);
+
     const toAnypointItem = (server) => {
-      const urlTemplate = this._getValue(server, key);
+
       return html`
-      <anypoint-item value="${this._getServerValue(server)}">${urlTemplate}</anypoint-item>
+      <anypoint-item value="${this._getServerValue(server)}">${this._getServerUrl(server)}</anypoint-item>
     `;
     };
     return servers ? servers.map(toAnypointItem) : [];
@@ -300,22 +327,54 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
     return undefined;
   }
 
+  _getSelectedServerUrl() {
+    const { _selectedIndex, servers = [] } = this;
+    if (_selectedIndex === null || _selectedIndex === undefined) {
+      return '';
+    }
+    if (_selectedIndex > servers.length) {
+      // Handle extra slot
+    }
+    return this._getServerUrl(servers[_selectedIndex]);
+  }
+
+  _renderUrl() {
+    const isCustom = this._getSelectedType(this._selectedIndex) === 'custom';
+
+    if (isCustom) {
+      // TODO handle change of this input
+      return html`
+      <anypoint-input name="url">
+        <label slot="label">URL</label>
+      </anypoint-input>
+    `;
+    }
+    return html`
+    <anypoint-input disabled name="url" value="${this._getSelectedServerUrl()}">
+      <label slot="label">URL</label>
+      </anypoint-input>
+    `;
+  }
+
   render() {
     // TODO
-    // Add input/label with server baseURI considering when URL is editable and when it is readonly
     const { _selectedIndex } = this
-    return html`
-    <anypoint-dropdown-menu>
-      <label slot="label">Select server</label>
-      <anypoint-listbox
-        .selected="${_selectedIndex}"
-        @selected-changed="${this.handleSelectionChanged}"
-        slot="dropdown-content"
-        tabindex="-1"
-      >
-        ${this.renderItems()}
-      </anypoint-listbox>
-    </anypoint-dropdown>
+
+    return html`<style>${this.styles}</style>
+    <div class="container">
+      <anypoint-dropdown-menu>
+        <label slot="label">Select server</label>
+        <anypoint-listbox
+          .selected="${_selectedIndex}"
+          @selected-changed="${this.handleSelectionChanged}"
+          slot="dropdown-content"
+          tabindex="-1"
+        >
+          ${this.renderItems()}
+        </anypoint-listbox>
+      </anypoint-dropdown-menu>
+      ${this._renderUrl()}
+    </div>
     `;
   }
 
