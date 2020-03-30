@@ -1,6 +1,6 @@
 [![Published on NPM](https://img.shields.io/npm/v/@api-components/api-server-selector.svg)](https://www.npmjs.com/package/@api-components/api-server-selector)
 
-[![Build Status](https://travis-ci.org/advanced-rest-client/api-server-selector.svg?branch=stage)](https://travis-ci.org/advanced-rest-client/api-server-selector)
+[![Build Status](https://travis-ci.com/advanced-rest-client/api-server-selector.svg?branch=stage)](https://travis-ci.com/advanced-rest-client/api-server-selector)
 
 
 ## &lt;api-server-selector&gt;
