@@ -11,7 +11,7 @@ import '@anypoint-web-components/anypoint-input/anypoint-input.js';
  * This component receives an AMF model, and listens
  * to navigation events to know which node's servers
  * it should render.
- * 
+ *
  * When the selected server changes, it dispatches an `api-server-changed`
  * event, with the following details:
  * - Server value: the server id (for listed servers in the model), the URL
@@ -21,7 +21,7 @@ import '@anypoint-web-components/anypoint-input/anypoint-input.js';
  *    - `server`: server from the AMF model
  *    - `custom`: custom URL input change
  *    - `extra`: extra slot's anypoint-item `value` attribute (see below)
- * 
+ *
  * Adding extra slot:
  * This component renders a `slot` element to render anything the users wants
  * to add in there. To enable this, sit the `extraOptions` value in this component
@@ -29,7 +29,7 @@ import '@anypoint-web-components/anypoint-input/anypoint-input.js';
  * The items rendered in this slot should be `anypoint-item` components, and have a
  * `value` attribute. This is the value that will be dispatched in the `api-server-changed`
  * event.
- * 
+ *
  *
  *
  * @customElement
@@ -54,6 +54,11 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
        */
       amf: { type: Object },
       /**
+       * If this property is set, the dropdown and the url input are
+       * rendered in the same line
+       */
+      inline: { type: Boolean },
+      /**
        * Holds the current servers to show in in the dropdown menu
        */
       _servers: { type: Array },
@@ -73,11 +78,11 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
 
   get styles() {
     return css`
-      .container {
+      .inline {
         display: flex
       }
 
-      anypoint-input {
+      .inline anypoint-input {
         margin: 16px 8px;
       }
     `;
@@ -108,7 +113,7 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
     }
 
     this._amf = model;
-    this.updateServers({});
+    this.updateServers({ id: undefined, type: undefined, endpointId: undefined });
   }
 
   get amf() {
@@ -209,7 +214,7 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
 
   /**
    * Search for a server in a list of search, comparing against AMF id
-   * 
+   *
    * @param {String} serverId The desired server to search for
    * @param {Array} servers The list of AMF server models to search in,
    * @return {Number} The index of the server, or -1 if not found
@@ -233,7 +238,7 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
 
   /**
    * Update component's servers
-   * 
+   *
    * @param {Object} selectedNodeParams The currently selected node parameters to set the servers for
    * @param {String} selectedNodeParams.id The selected node ID where servers should be fetched
    * @param {String} selectedNodeParams.type The selected node type where servers should be fetched
@@ -254,11 +259,11 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
 
   /**
    * Handler for the listbox's change event
-   * @param {CustomEvent} e 
+   * @param {CustomEvent} e
    */
   handleSelectionChanged(e) {
-    const { selectedItem } = e.target
-    const { value } = e.detail
+    const { selectedItem } = e.target;
+    const { value } = e.detail;
     if (!selectedItem) {
       return;
     }
@@ -266,12 +271,11 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
     if (selectedValue === this._selectedValue) {
       return;
     }
-    const selectedIndex = value;
-    this._changeSelected({ selectedIndex, selectedValue });
+    this._changeSelected({ selectedIndex: value, selectedValue });
   }
 
   /**
-   * 
+   *
    * @param {Object} params Composed object
    * @param {Number} params.selectedIndex The index of the selected item in the listbox
    * @param {String} params.selectedValue The value of the selected item in the listbox
@@ -378,18 +382,10 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
     return undefined;
   }
 
-  _getSelectedServerUrl() {
-    const { _selectedIndex, servers = [] } = this;
-    if (_selectedIndex === null || _selectedIndex === undefined) {
-      return '';
-    }
-    if (_selectedIndex > servers.length) {
-      // Handle extra slot
-    }
-    return this._getServerUrl(servers[_selectedIndex]);
-  }
-
   _renderUrl() {
+    if (this._selectedValue === null || this._selectedValue === undefined) {
+      return;
+    }
     const isCustom = this._getSelectedType(this._selectedIndex) === 'custom';
 
     if (isCustom) {
@@ -407,14 +403,14 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
   }
 
   _handleUrlChange(event) {
-    const { value } = event.target
+    const { value } = event.target;
     this.url = value;
   }
 
   render() {
-    const { _selectedIndex } = this
+    const { _selectedIndex, inline } = this;
     return html`<style>${this.styles}</style>
-    <div class="container">
+    <div class="${inline ? 'inline' : ''}">
       <anypoint-dropdown-menu class="api-server-dropdown">
         <label slot="label">Select server</label>
         <anypoint-listbox
