@@ -54,6 +54,11 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
        */
       amf: { type: Object },
       /**
+       * If this property is set, the dropdown and the url input are
+       * rendered in the same line
+       */
+      inline: { type: Boolean },
+      /**
        * Holds the current servers to show in in the dropdown menu
        */
       _servers: { type: Array },
@@ -73,11 +78,11 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
 
   get styles() {
     return css`
-      .container {
+      .inline {
         display: flex
       }
 
-      anypoint-input {
+      .inline anypoint-input {
         margin: 16px 8px;
       }
     `;
@@ -390,6 +395,9 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
   }
 
   _renderUrl() {
+    if (this._selectedValue === null || this._selectedValue === undefined) {
+      return;
+    }
     const isCustom = this._getSelectedType(this._selectedIndex) === 'custom';
 
     if (isCustom) {
@@ -412,9 +420,9 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
   }
 
   render() {
-    const { _selectedIndex } = this
+    const { _selectedIndex, inline } = this
     return html`<style>${this.styles}</style>
-    <div class="container">
+    <div class="${inline ? 'inline' : ''}">
       <anypoint-dropdown-menu class="api-server-dropdown">
         <label slot="label">Select server</label>
         <anypoint-listbox
