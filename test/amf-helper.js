@@ -9,7 +9,6 @@ AmfHelper.getEncodes = function (element, amf) {
   if (Array.isArray(amf)) {
     amf = amf[0];
   }
-  // console.log({ amf, key })
   return amf[key];
 }
 
@@ -26,7 +25,6 @@ AmfHelper.getServer = function (element, amf, serverUrl) {
   }
   const serverKey = element._getAmfKey(element.ns.aml.vocabularies.apiContract.server);
   const urlKey = element._getAmfKey(element.ns.aml.vocabularies.core.urlTemplate);
-  console.log({ amf })
   return element._getValueArray(amf, serverKey).find(server => element._getValue(server, urlKey) === serverUrl);
 }
 

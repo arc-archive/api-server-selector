@@ -47,7 +47,17 @@ describe('<api-server-selector>', () => {
         it('should return url after setting it', () => {
             element.url = 'test url';
             assert.equal(element.url, 'test url');
-        })
+        });
+
+        it('should select custom url', () => {
+            const target = { selectedItem: { getAttribute: () => 'custom' } };
+            const detail = {
+                value: 0,
+            };
+            element.handleSelectionChanged({ detail, target });
+            assert.equal(element._selectedIndex, 0);
+            assert.equal(element._selectedValue, 'custom');
+        });
     });
 
     describe('With fixed baseUri', () => {
@@ -155,6 +165,17 @@ describe('<api-server-selector>', () => {
                 assert.equal(element._selectedValue, id);
                 assert.equal(element._selectedIndex, index);
             });
+
+            it('should select custom url', () => {
+                const index = element.servers.length;
+                const target = { selectedItem: { getAttribute: () => 'custom' } };
+                const detail = {
+                    value: index,
+                };
+                element.handleSelectionChanged({ detail, target });
+                assert.equal(element._selectedValue, 'custom');
+                assert.equal(element._selectedIndex, index);
+            });
         })
 
         describe('_checkForSelectedChange()', () => {
@@ -179,8 +200,122 @@ describe('<api-server-selector>', () => {
                 };
                 element.handleSelectionChanged({ detail, target });
                 element.servers = [];
+                assert.isUndefined(element._selectedIndex);
+                assert.isUndefined(element._selectedValue);
+            });
+
+            it('should reset selected if servers is undefined', () => {
+                const encodes = AmfHelper.getEncodes(element, amf)
+                const server = AmfHelper.getServer(element, encodes, 'https://{customerId}.saas-app.com:{port}/v2');
+                const id = server['@id'];
+                const index = AmfHelper.indexOfServer(element, encodes, id)
+                const target = { selectedItem: { getAttribute: () => id } };
+                const detail = {
+                    value: index,
+                };
+                element.handleSelectionChanged({ detail, target });
+                element.servers = undefined;
+                assert.isUndefined(element._selectedIndex);
+                assert.isUndefined(element._selectedValue);
+            });
+
+            it('should update index if custom url is selected and servers change', async () => {
+                element = await basicFixture();
+                const target = { selectedItem: { getAttribute: () => 'custom' } };
+                const detail = {
+                    value: 0,
+                };
+                element.handleSelectionChanged({ detail, target });
+                element.amf = amf;
+                assert.equal(element._selectedIndex, element.servers.length);
+                assert.equal(element._selectedValue, 'custom');
+            });
+
+            it('should update index if servers change and selected is in new servers', () => {
+                const encodes = AmfHelper.getEncodes(element, amf)
+                const server = AmfHelper.getServer(element, encodes, 'https://{customerId}.saas-app.com:{port}/v2');
+                const id = server['@id'];
+                const index = AmfHelper.indexOfServer(element, encodes, id)
+                const target = { selectedItem: { getAttribute: () => id } };
+                const detail = {
+                    value: index,
+                };
+                element.handleSelectionChanged({ detail, target });
+                element.servers = [...element.servers];
+                assert.isDefined(element._selectedIndex);
+                assert.isDefined(element._selectedValue);
             });
         });
-    })
+
+        describe('_getIndexOfServer()', () => {
+            let amf;
+            let element;
+
+            beforeEach(async () => {
+                amf = await AmfLoader.load(item[1]);
+                element = await basicFixture();
+                element.amf = amf;
+                await nextFrame();
+            });
+
+            it('should return -1 if not found', () => {
+                assert.equal(element._getIndexOfServer('foo', element.servers), -1);
+            });
+
+            it('should return index if found', () => {
+                const first = element.servers[0];
+                assert.equal(element._getIndexOfServer(first['@id'], element.servers), 0);
+            });
+        });
+
+        describe('_getServerValue()', () => {
+            let amf;
+            let element;
+
+            beforeEach(async () => {
+                amf = await AmfLoader.load(item[1]);
+                element = await basicFixture();
+                element.amf = amf;
+                await nextFrame();
+            });
+
+            it('should return undefined if no server', () => {
+                assert.isUndefined(element._getServerValue(undefined));
+            });
+
+            it('should return server id', () => {
+                const first = element.servers[0];
+                assert.equal(element._getServerValue(first), first['@id']);
+            });
+        });
+
+        describe('updateServers()', () => {
+            let amf;
+            let element;
+
+            beforeEach(async () => {
+                amf = await AmfLoader.load(item[1]);
+                element = await basicFixture();
+                element.amf = amf;
+                await nextFrame();
+            });
+
+            it('should update servers for endpoint', () => {
+                const endpointId = AmfHelper.getEndpoint(element, amf, '/ping')['@id'];
+                element.updateServers({ type: 'endpoint', id: endpointId })
+                assert.equal(element.endpointId, endpointId);
+                assert.isUndefined(element.methodId);
+                assert.lengthOf(element.servers, 1);
+            });
+
+            it('should update servers for method', () => {
+                const endpointId = AmfHelper.getEndpoint(element, amf, '/ping')['@id'];
+                const methodId = AmfHelper.getMethod(element, amf, '/ping', 'get')['@id'];
+                element.updateServers({ type: 'method', id: methodId, endpointId })
+                assert.equal(element.endpointId, endpointId);
+                assert.equal(element.methodId, methodId);
+                assert.lengthOf(element.servers, 2);
+            });
+        });
+    });
 });
-// TODO add tests

@@ -196,16 +196,13 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
       const indexInNewServers = this._getIndexOfServer(this._selectedValue, this.servers)
       if (indexInNewServers > -1) {
         newIndex = indexInNewServers;
-        // this._changeSelected({ selectedIndex: indexInNewServers, selectedValue: this._selectedValue })
       } else {
         newIndex = undefined;
         newValue = undefined;
-        // this._resetSelectedServer();
       }
     } else {
       const serverOffest = this.servers.length - oldServers.length;
       newIndex = this._selectedIndex + serverOffest;
-      // this._changeSelected({ selectedIndex: newIndex, selectedValue: this._selectedValue })
     }
     this._changeSelected({ selectedIndex: newIndex, selectedValue: newValue })
   }
@@ -227,10 +224,6 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
     return -1;
   }
 
-  _resetSelectedServer() {
-    this._changeSelected({ selectedIndex: undefined, selectedValue: undefined });
-  }
-
   _getServerValue(server) {
     if (server) {
       return this._getValue(server, '@id');
@@ -249,11 +242,12 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
   updateServers({ id, type, endpointId }) {
     let methodId;
     if (type === 'method') {
-      this.methodId = methodId = id;
+      methodId = id;
     }
     if (type === 'endpoint') {
       endpointId = id;
     }
+    this.methodId = methodId;
     this.endpointId = endpointId;
     this.servers = this._getServers({ endpointId, methodId });
   }
