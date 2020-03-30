@@ -4,8 +4,12 @@ sudo: required
 addons:
   chrome: stable
 install:
-  - npm ci
-  - npm i -D @api-components/api-model-generator
+- npm ci
+- npm i -D @api-components/api-model-generator
 script:
-  - npm test
-  - if [ "${TRAVIS_PULL_REQUEST}" = "false" ]; then npm run test:sl; fi
+- npm test
+- if [ "${TRAVIS_PULL_REQUEST}" = "false" ]; then npm run test:sl; fi
+env:
+  global:
+  - secure: r+lIDgkdUXYMo4QarL8hab/OXo13Jp5+r0bHPDn7Mnpv9dlnUtjzfnULg6IHHjhadBSdfGJYHPFoQOo3XIyTBt1GByP3EFuG8XHB31So0j04BVdN6RuEUn0QC423oU6w7UAks/MgP9Rk0HWdrX2e1jkJM2UzIZ0C7bgnLnb0xMKsGCs8yk9AvOpgR/HUIKY7234VmOEvFmiPapv+Uym59FAcmHTpqxVOjnrPNxRZOJnPus6n2v3uM9YNBWiUF9CvElCVE8a3weRuf8tt3xYx4oT18tEN7DG29j6mmwwj9ETFJ5ycxA+iw965T+QTApzCwMoCoJZwZRH5UYhnf5RxOuE52nib2bL9+z5gYwIXgXAW11AFb4w8oJwYA0jP+ct2FO2ysSQJ9s4Q0JgH3gXMvE6IIjNVvwgssZfobFTyE7f2mBh6zg8ed75bVbxunMaXQ2cAaX4N8blESexYeAndnHxyxg1hkAcPvtIvDTXP3dUFx3rTZt07QIxZ2iYl+6XTsAWPhuVUUl57CV78uxdQH0EuKdbbzLCBSg1+aL+jlCqpSxhI31R1F6nAmLy1nYsjS0CB7cYsguq2bMpBy12BMiiWRWaclsJbV1/AWgvDRMe6AukRWozMtGmYhne4k0eNWI8vDyrhe0TfSbz0+x+RWXgMZ2T3njx190VkFXCRR5I=
+  - secure: rqocFx7bkh0iV2dcmM0g/sUteSMqVTCtgzoT1lj/npCyQ5+tNPHVHI/yRHOLXctJbbRmVMvcT5UbUFRnqW72C/g4+UH6tx9tdv3mgQR0bUY+hdYx79QGalPVES9DXjBxlvUJa/ECzST1ff3Xtf2qlx993eWpeJYLb0CMA+WQmOyiPl9r6lT4rJaINTubztVjjPIxvmusQ63v23Pe1B9K8Mf1Tj8zeDOW8WP0iYx9JmJYYyEdgWVi16az3VoO/IwW4PZLp9sswwz18P+MEWV3kqWQGL8G7CJnApJ8zygww7ktrUd7FMIs4JF9eNFNaeU2Js6JFnVIiJGrg/AurJro92URij9N8kEXdPrfHhlvO1JcbO0Puw/iVMbQAVQ/l38IRw3I8p5uLWRyU7iPZZkEzeWQ2RpjENptyhIlVCkFEwY2v4203va2hUZOHGjx7DCAluVvIj+YIm0P5vGOA09ZgcF+S4a0Algq9FIQMCy7yIx+uTiBN5fpWZOzHPnFhhbdT33T9v60eJfqxH3DXtx/p8BQbMOjoxKmgQyIt3rYT5mqkjSbITikSqGuX07F9RM4yKSYNe2FfbXdnMqmp355dK8RiJ1XtAhKFde5HsFQugxEwjwDOrToy3VZfgw9iBtGOx9Cxbn7DPAKQ2GouEE1XviKzYOkcRhLiztv3m2UQgk=
