@@ -16,6 +16,14 @@ describe('<api-server-selector>', () => {
         return (await fixture(`<api-server-selector baseUri="https://www.google.com"></api-server-selector>`));
     }
 
+    function simulateSelection(element, index, value) {
+        const target = { selectedItem: { getAttribute: () => value } };
+        const detail = {
+            value: index,
+        };
+        element.handleSelectionChanged({ detail, target });
+    }
+
     describe('Basic - No model', () => {
         let element;
 
@@ -25,11 +33,16 @@ describe('<api-server-selector>', () => {
         });
 
         it('should render dropdown', () => {
-            assert.exists(element.shadowRoot.querySelector('.api-server-dropdown'))
+            assert.exists(element.shadowRoot.querySelector('.api-server-dropdown'));
         });
 
-        it('should render url input field', () => {
-            assert.exists(element.shadowRoot.querySelector('.url-input'))
+        it('should not render url input field', () => {
+            assert.notExists(element.shadowRoot.querySelector('.url-input'));
+        });
+
+        it('should render url input field when any value is selected', () => {
+            simulateSelection(element, 0, 'custom');
+            assert.exists(element.shadowRoot.querySelector('.url-input'));
         });
 
         it('should have empty URL', () => {
@@ -153,26 +166,18 @@ describe('<api-server-selector>', () => {
             });
 
             it('should select server', () => {
-                const encodes = AmfHelper.getEncodes(element, amf)
+                const encodes = AmfHelper.getEncodes(element, amf);
                 const server = AmfHelper.getServer(element, encodes, 'https://{customerId}.saas-app.com:{port}/v2');
                 const id = server['@id'];
-                const index = AmfHelper.indexOfServer(element, encodes, id)
-                const target = { selectedItem: { getAttribute: () => id } };
-                const detail = {
-                    value: index,
-                };
-                element.handleSelectionChanged({ detail, target });
+                const index = AmfHelper.indexOfServer(element, encodes, id);
+                simulateSelection(element, index, id);
                 assert.equal(element._selectedValue, id);
                 assert.equal(element._selectedIndex, index);
             });
 
             it('should select custom url', () => {
                 const index = element.servers.length;
-                const target = { selectedItem: { getAttribute: () => 'custom' } };
-                const detail = {
-                    value: index,
-                };
-                element.handleSelectionChanged({ detail, target });
+                simulateSelection(element, index, 'custom');
                 assert.equal(element._selectedValue, 'custom');
                 assert.equal(element._selectedIndex, index);
             });
@@ -194,11 +199,7 @@ describe('<api-server-selector>', () => {
                 const server = AmfHelper.getServer(element, encodes, 'https://{customerId}.saas-app.com:{port}/v2');
                 const id = server['@id'];
                 const index = AmfHelper.indexOfServer(element, encodes, id)
-                const target = { selectedItem: { getAttribute: () => id } };
-                const detail = {
-                    value: index,
-                };
-                element.handleSelectionChanged({ detail, target });
+                simulateSelection(element, index, id);
                 element.servers = [];
                 assert.isUndefined(element._selectedIndex);
                 assert.isUndefined(element._selectedValue);
@@ -209,11 +210,7 @@ describe('<api-server-selector>', () => {
                 const server = AmfHelper.getServer(element, encodes, 'https://{customerId}.saas-app.com:{port}/v2');
                 const id = server['@id'];
                 const index = AmfHelper.indexOfServer(element, encodes, id)
-                const target = { selectedItem: { getAttribute: () => id } };
-                const detail = {
-                    value: index,
-                };
-                element.handleSelectionChanged({ detail, target });
+                simulateSelection(element, index, id);
                 element.servers = undefined;
                 assert.isUndefined(element._selectedIndex);
                 assert.isUndefined(element._selectedValue);
@@ -221,11 +218,7 @@ describe('<api-server-selector>', () => {
 
             it('should update index if custom url is selected and servers change', async () => {
                 element = await basicFixture();
-                const target = { selectedItem: { getAttribute: () => 'custom' } };
-                const detail = {
-                    value: 0,
-                };
-                element.handleSelectionChanged({ detail, target });
+                simulateSelection(element, 0, 'custom');
                 element.amf = amf;
                 assert.equal(element._selectedIndex, element.servers.length);
                 assert.equal(element._selectedValue, 'custom');
@@ -236,11 +229,7 @@ describe('<api-server-selector>', () => {
                 const server = AmfHelper.getServer(element, encodes, 'https://{customerId}.saas-app.com:{port}/v2');
                 const id = server['@id'];
                 const index = AmfHelper.indexOfServer(element, encodes, id)
-                const target = { selectedItem: { getAttribute: () => id } };
-                const detail = {
-                    value: index,
-                };
-                element.handleSelectionChanged({ detail, target });
+                simulateSelection(element, index, id);
                 element.servers = [...element.servers];
                 assert.isDefined(element._selectedIndex);
                 assert.isDefined(element._selectedValue);
