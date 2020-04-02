@@ -39,6 +39,7 @@
     "prepare": "node demo/model.js"
   },
   "dependencies": {
+    "@advanced-rest-client/arc-icons": "^3.0.5",
     "@advanced-rest-client/events-target-mixin": "^3.0.0",
     "@anypoint-web-components/anypoint-dropdown": "^1.0.1",
     "@anypoint-web-components/anypoint-dropdown-menu": "^0.1.14",

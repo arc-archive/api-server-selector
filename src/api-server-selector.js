@@ -2,6 +2,7 @@ import { html, LitElement, css } from 'lit-element';
 import { AmfHelperMixin } from '@api-components/amf-helper-mixin/amf-helper-mixin.js';
 import { EventsTargetMixin } from '@advanced-rest-client/events-target-mixin/events-target-mixin.js';
 import '@anypoint-web-components/anypoint-input/anypoint-input.js';
+import { close } from '@advanced-rest-client/arc-icons/ArcIcons.js';
 
 /**
  * `api-server-selector`
@@ -14,12 +15,12 @@ import '@anypoint-web-components/anypoint-input/anypoint-input.js';
  *
  * When the selected server changes, it dispatches an `api-server-changed`
  * event, with the following details:
- * - Server value: the server id (for listed servers in the model), the URL
- *    value (when custom URL is selected), or the value of the `anypoint-item`
+ * - Server value: the server id (for listed servers in the model), the URI
+ *    value (when custom URI is selected), or the value of the `anypoint-item`
  *    component rendered into the extra slot
  * - Selected type: `server` | `custom` | `extra`
  *    - `server`: server from the AMF model
- *    - `custom`: custom URL input change
+ *    - `custom`: custom URI input change
  *    - `extra`: extra slot's anypoint-item `value` attribute (see below)
  *
  * Adding extra slot:
@@ -54,7 +55,7 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
        */
       amf: { type: Object },
       /**
-       * If this property is set, the dropdown and the url input are
+       * If this property is set, the dropdown and the uri input are
        * rendered in the same line
        */
       inline: { type: Boolean },
@@ -67,7 +68,7 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
       _selectedType: { type: String },
       _endpointId: { type: String },
       _methodId: { type: String },
-      _url: { type: String },
+      _uri: { type: String },
     };
   }
 
@@ -146,16 +147,16 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
     this._endpointId = value;
   }
 
-  get url() {
-    return this.baseUri || this._url || '';
+  get uri() {
+    return this.baseUri || this._uri || '';
   }
 
-  set url(value) {
-    const old = this._url;
+  set uri(value) {
+    const old = this._uri;
     if (value === old) {
       return;
     }
-    this._url = value;
+    this._uri = value;
     dispatchEvent(
       new CustomEvent('api-server-changed', {
         detail: { value },
@@ -285,29 +286,28 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
     if (selectedIndex === this._selectedIndex && selectedValue === oldValue) {
       return;
     }
-
     const selectedType = this._getSelectedType(selectedIndex);
-    this._setUrl({ selectedIndex, selectedValue, selectedType });
+    this._setUri({ selectedIndex, selectedValue, selectedType });
     this._selectedIndex = selectedIndex;
     this._selectedValue = selectedValue;
     this.selectedType = selectedType;
   }
 
-  _setUrl({ selectedIndex, selectedValue, selectedType }) {
-    let url;
+  _setUri({ selectedIndex, selectedValue, selectedType }) {
+    let uri;
     if (selectedType === 'server') {
-      url = this._getServerUrl(this.servers[selectedIndex]);
+      uri = this._getServerUri(this.servers[selectedIndex]);
     } else if (selectedType === 'custom') {
       if (this.selectedType === 'custom') {
-        url = this.url;
+        uri = this.uri;
       } else {
-        url = '';
+        uri = '';
       }
     } else {
       // `extra`
-      url = selectedValue;
+      uri = selectedValue;
     }
-    this.url = url;
+    this.uri = uri;
   }
 
   _getSelectedType(selectedIndex) {
@@ -328,19 +328,19 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
   /**
    * Call the render functions for
    * - Server options (from AMF Model)
-   * - Custom URL option
+   * - Custom URI option
    * - Extra slot
    * @return {TemplateResult} The combination of all options
    */
   renderItems() {
     return html`
       ${this.renderServerOptions()}
-      ${this.renderCustomURLOption()}
+      ${this.renderCustomURIOption()}
       ${this.renderExtraSlot()}
     `;
   }
 
-  _getServerUrl(server) {
+  _getServerUri(server) {
     const key = this._getAmfKey(this.ns.aml.vocabularies.core.urlTemplate);
     return this._getValue(server, key);
   }
@@ -350,20 +350,18 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
 
     const toAnypointItem = (server) => {
 
-      return html`
-      <anypoint-item value="${this._getServerValue(server)}">${this._getServerUrl(server)}</anypoint-item>
-    `;
+      return html`<anypoint-item value="${this._getServerValue(server)}">
+        ${this._getServerUri(server)}
+      </anypoint-item>`;
     };
     return servers ? servers.map(toAnypointItem) : [];
   }
 
   /**
-   * @return {TemplateResult} Custom URL `anypoint-item`
+   * @return {TemplateResult} Custom URI `anypoint-item`
    */
-  renderCustomURLOption() {
-    return html`
-      <anypoint-item value="custom">Custom URL</anypoint-item>
-    `;
+  renderCustomURIOption() {
+    return html`<anypoint-item value="custom">Custom URI</anypoint-item>`;
   }
 
   /**
@@ -375,56 +373,53 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
   renderExtraSlot() {
     const { extraOptions } = this;
     if (extraOptions) {
-      return html`
-        <slot name="api-server-extra-slot"></slot>
-      `;
+      return html`<slot name="api-server-extra-slot"></slot>`;
     }
     return undefined;
   }
 
-  _renderUrl() {
-    if (this._selectedValue === null || this._selectedValue === undefined) {
-      return;
-    }
-    const isCustom = this._getSelectedType(this._selectedIndex) === 'custom';
-
-    if (isCustom) {
-      return html`
-      <anypoint-input class="url-input" @input=${this._handleUrlChange} value="${this.url}">
-        <label slot="label">URL</label>
-      </anypoint-input>
-    `;
-    }
-    return html`
-    <anypoint-input class="url-input" disabled value="${this.url}">
-      <label slot="label">URL</label>
-      </anypoint-input>
-    `;
+  _handleUriChange(event) {
+    const { value } = event.target;
+    this.uri = value;
   }
 
-  _handleUrlChange(event) {
-    const { value } = event.target;
-    this.url = value;
+  _resetSelection() {
+    this._changeSelected({ selectedIndex: undefined, selectedValue: undefined });
   }
 
   render() {
     const { _selectedIndex, inline } = this;
+    const isCustom = this._selectedType === 'custom';
     return html`<style>${this.styles}</style>
     <div class="${inline ? 'inline' : ''}">
-      <anypoint-dropdown-menu class="api-server-dropdown">
-        <label slot="label">Select server</label>
-        <anypoint-listbox
-          .selected="${_selectedIndex}"
-          @selected-changed="${this.handleSelectionChanged}"
-          slot="dropdown-content"
-          tabindex="-1"
+      ${isCustom
+        ? html`<anypoint-input class="uri-input" @input=${this._handleUriChange} value="${this.uri}">
+          <label slot="label">Base URI</label>
+          <anypoint-icon-button
+            aria-label="Activate to clear and close custom editor"
+            title="Clear and close custom editor"
+            slot="suffix"
+            @click="${this._resetSelection}"
+          >
+            <span class="icon">${close}</span>
+          </anypoint-icon-button>
+        </anypoint-input>`
+        : html`<anypoint-dropdown-menu
+        class="api-server-dropdown"
+        ?hidden="${isCustom}"
         >
-          ${this.renderItems()}
-        </anypoint-listbox>
-      </anypoint-dropdown-menu>
-      ${this._renderUrl()}
-    </div>
-    `;
+         <label slot="label">Select server</label>
+         <anypoint-listbox
+           .selected="${_selectedIndex}"
+           @selected-changed="${this.handleSelectionChanged}"
+           slot="dropdown-content"
+           tabindex="-1"
+         >
+           ${this.renderItems()}
+         </anypoint-listbox>
+        </anypoint-dropdown-menu>`}
+      
+    </div>`;
   }
 
   _attachListeners(node) {

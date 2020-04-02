@@ -36,36 +36,36 @@ describe('<api-server-selector>', () => {
       assert.exists(element.shadowRoot.querySelector('.api-server-dropdown'));
     });
 
-    it('should not render url input field', () => {
-      assert.notExists(element.shadowRoot.querySelector('.url-input'));
+    it('should not render uri input field', () => {
+      assert.notExists(element.shadowRoot.querySelector('.uri-input'));
     });
 
-    it('should render url input field when any value is selected', async () => {
+    it('should render uri input field when any value is selected', async () => {
       simulateSelection(element, 0, 'custom');
       await nextFrame();
-      assert.exists(element.shadowRoot.querySelector('.url-input'));
+      assert.exists(element.shadowRoot.querySelector('.uri-input'));
     });
 
-    it('should have empty URL', () => {
-      assert.equal(element.url, '');
+    it('should have empty URI', () => {
+      assert.equal(element.uri, '');
     });
 
-    it('should have empty URL field', async () => {
+    it('should have empty URI field', async () => {
       simulateSelection(element, 0, 'custom');
       await nextFrame();
-      assert.isEmpty(element.shadowRoot.querySelector('.url-input').value);
+      assert.isEmpty(element.shadowRoot.querySelector('.uri-input').value);
     });
 
     it('should not render extra slot', () => {
       assert.notExists(element.shadowRoot.querySelector('slot [name="api-server-extra-slot"]'));
     });
 
-    it('should return url after setting it', () => {
-      element.url = 'test url';
-      assert.equal(element.url, 'test url');
+    it('should return uri after setting it', () => {
+      element.uri = 'test uri';
+      assert.equal(element.uri, 'test uri');
     });
 
-    it('should select custom url', () => {
+    it('should select custom uri', () => {
       const target = { selectedItem: { getAttribute: () => 'custom' } };
       const detail = {
         value: 0,
@@ -84,13 +84,13 @@ describe('<api-server-selector>', () => {
       await nextFrame();
     });
 
-    it('should have baseUri as url', () => {
-      assert.equal(element.url, 'https://www.google.com');
+    it('should have baseUri as uri', () => {
+      assert.equal(element.uri, 'https://www.google.com');
     })
 
-    it('should return baseUri as url after setting url', () => {
-      element.url = 'test url';
-      assert.equal(element.url, 'https://www.google.com');
+    it('should return baseUri as uri after setting uri', () => {
+      element.uri = 'test uri';
+      assert.equal(element.uri, 'https://www.google.com');
     })
   });
 
@@ -178,7 +178,7 @@ describe('<api-server-selector>', () => {
         assert.equal(element._selectedIndex, index);
       });
 
-      it('should select custom url', () => {
+      it('should select custom uri', () => {
         const index = element.servers.length;
         simulateSelection(element, index, 'custom');
         assert.equal(element._selectedValue, 'custom');
@@ -219,7 +219,7 @@ describe('<api-server-selector>', () => {
         assert.isUndefined(element._selectedValue);
       });
 
-      it('should update index if custom url is selected and servers change', async () => {
+      it('should update index if custom uri is selected and servers change', async () => {
         element = await basicFixture();
         simulateSelection(element, 0, 'custom');
         element.amf = amf;
