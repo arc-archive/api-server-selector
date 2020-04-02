@@ -238,7 +238,7 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
     if (server) {
       return this._getValue(server, '@id');
     }
-    return undefined;
+    return '';
   }
 
   /**
@@ -366,9 +366,9 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
    */
   renderCustomURIOption() {
     if (this.hideCustom) {
-      return undefined;
+      return '';
     }
-    return html`<anypoint-item value="custom">Custom URI</anypoint-item>`;
+    return html`<anypoint-item class="custom-option" value="custom">Custom URI</anypoint-item>`;
   }
 
   /**
@@ -382,7 +382,7 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
     if (extraOptions) {
       return html`<slot name="api-server-extra-slot"></slot>`;
     }
-    return undefined;
+    return '';
   }
 
   _handleUriChange(event) {

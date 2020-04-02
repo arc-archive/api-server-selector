@@ -8,6 +8,10 @@ describe('<api-server-selector>', () => {
     return (await fixture(`<api-server-selector></api-server-selector>`));
   }
 
+  async function hideCustomFixture() {
+    return (await fixture(`<api-server-selector hideCustom></api-server-selector>`));
+  }
+
   async function extraOptionsFixture() {
     return (await fixture(`<api-server-selector extraOptions></api-server-selector>`));
   }
@@ -87,14 +91,24 @@ describe('<api-server-selector>', () => {
       assert.notExists(element.shadowRoot.querySelector('.uri-input'));
     });
 
+    it('should render `Custom URI` option by default', () => {
+      assert.exists(element.shadowRoot.querySelector('.custom-option'));
+    });
+
+    it('should not render `Custom URI` when `hideCustom` is enabled', async () => {
+      element = await hideCustomFixture()
+      await nextFrame();
+      assert.notExists(element.shadowRoot.querySelector('.custom-option'));
+    });
+
     describe('renderCustomURIOption()', () => {
       it('should return custom uri option', () => {
-        assert.isDefined(element.renderCustomURIOption());
+        assert.isNotEmpty(element.renderCustomURIOption());
       });
 
       it('should not return custom uri option when `hideCustom` is enabled', () => {
         element.hideCustom = true;
-        assert.isUndefined(element.renderCustomURIOption());
+        assert.isEmpty(element.renderCustomURIOption());
       });
     });
   });
@@ -295,7 +309,7 @@ describe('<api-server-selector>', () => {
       });
 
       it('should return undefined if no server', () => {
-        assert.isUndefined(element._getServerValue(undefined));
+        assert.isEmpty(element._getServerValue(undefined));
       });
 
       it('should return server id', () => {
