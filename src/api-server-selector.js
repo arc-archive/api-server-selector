@@ -1,4 +1,4 @@
-import { html, LitElement, css } from 'lit-element';
+import { html, LitElement } from 'lit-element';
 import { AmfHelperMixin } from '@api-components/amf-helper-mixin/amf-helper-mixin.js';
 import { EventsTargetMixin } from '@advanced-rest-client/events-target-mixin/events-target-mixin.js';
 import '@anypoint-web-components/anypoint-input/anypoint-input.js';
@@ -55,11 +55,6 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
        */
       amf: { type: Object },
       /**
-       * If this property is set, the dropdown and the uri input are
-       * rendered in the same line
-       */
-      inline: { type: Boolean },
-      /**
        * If activated, `Custom URI` will not be in the dropdown options
        */
       hideCustom: { type: Boolean },
@@ -79,18 +74,6 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
   constructor() {
     super();
     this.handleNavigationChange = this.handleNavigationChange.bind(this);
-  }
-
-  get styles() {
-    return css`
-      .inline {
-        display: flex
-      }
-
-      .inline anypoint-input {
-        margin: 16px 8px;
-      }
-    `;
   }
 
   set servers(value) {
@@ -161,9 +144,11 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
       return;
     }
     this._uri = value;
-    dispatchEvent(
+    this.dispatchEvent(
       new CustomEvent('api-server-changed', {
         detail: { value },
+        bubbles: true,
+        composed: true,
       }),
     );
   }
@@ -394,38 +379,40 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
     this._changeSelected({ selectedIndex: undefined, selectedValue: undefined });
   }
 
+  _renderUriInput() {
+    return html`<anypoint-input class="uri-input" @input=${this._handleUriChange} value="${this.uri}">
+    <label slot="label">Base URI</label>
+    <anypoint-icon-button
+      aria-label="Activate to clear and close custom editor"
+      title="Clear and close custom editor"
+      slot="suffix"
+      @click="${this._resetSelection}"
+    >
+      <span class="icon">${close}</span>
+    </anypoint-icon-button>
+  </anypoint-input>`;
+  }
+
+  _renderDropdown() {
+    return html`<anypoint-dropdown-menu class="api-server-dropdown">
+    <label slot="label">Select server</label>
+    <anypoint-listbox
+      .selected="${this._selectedIndex}"
+      @selected-changed="${this.handleSelectionChanged}"
+      slot="dropdown-content"
+      tabindex="-1"
+    >
+      ${this.renderItems()}
+    </anypoint-listbox>
+  </anypoint-dropdown-menu>`;
+  }
+
   render() {
-    const { _selectedIndex, inline } = this;
     const isCustom = this._selectedType === 'custom';
-    return html`<style>${this.styles}</style>
-    <div class="${inline ? 'inline' : ''}">
+    return html`<div>
       ${isCustom
-        ? html`<anypoint-input class="uri-input" @input=${this._handleUriChange} value="${this.uri}">
-          <label slot="label">Base URI</label>
-          <anypoint-icon-button
-            aria-label="Activate to clear and close custom editor"
-            title="Clear and close custom editor"
-            slot="suffix"
-            @click="${this._resetSelection}"
-          >
-            <span class="icon">${close}</span>
-          </anypoint-icon-button>
-        </anypoint-input>`
-        : html`<anypoint-dropdown-menu
-        class="api-server-dropdown"
-        ?hidden="${isCustom}"
-        >
-         <label slot="label">Select server</label>
-         <anypoint-listbox
-           .selected="${_selectedIndex}"
-           @selected-changed="${this.handleSelectionChanged}"
-           slot="dropdown-content"
-           tabindex="-1"
-         >
-           ${this.renderItems()}
-         </anypoint-listbox>
-        </anypoint-dropdown-menu>`}
-      
+        ? this._renderUriInput()
+        : this._renderDropdown()}
     </div>`;
   }
 
