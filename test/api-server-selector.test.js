@@ -74,6 +74,18 @@ describe('<api-server-selector>', () => {
       assert.equal(element._selectedIndex, 0);
       assert.equal(element._selectedValue, 'custom');
     });
+
+    it('should unrender uri input when clicking close', () => {
+      const target = { selectedItem: { getAttribute: () => 'custom' } };
+      const detail = {
+        value: 0,
+      };
+      element.handleSelectionChanged({ detail, target });
+      element._resetSelection();
+      assert.equal(element._selectedIndex, undefined);
+      assert.equal(element._selectedValue, undefined);
+      assert.notExists(element.shadowRoot.querySelector('.uri-input'));
+    });
   });
 
   describe('With fixed baseUri', () => {
