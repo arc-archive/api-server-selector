@@ -60,6 +60,10 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
        */
       inline: { type: Boolean },
       /**
+       * If activated, `Custom URI` will not be in the dropdown options
+       */
+      hideCustom: { type: Boolean },
+      /**
        * Holds the current servers to show in in the dropdown menu
        */
       _servers: { type: Array },
@@ -361,6 +365,9 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
    * @return {TemplateResult} Custom URI `anypoint-item`
    */
   renderCustomURIOption() {
+    if (this.hideCustom) {
+      return undefined;
+    }
     return html`<anypoint-item value="custom">Custom URI</anypoint-item>`;
   }
 

@@ -86,6 +86,17 @@ describe('<api-server-selector>', () => {
       assert.equal(element._selectedValue, undefined);
       assert.notExists(element.shadowRoot.querySelector('.uri-input'));
     });
+
+    describe('renderCustomURIOption()', () => {
+      it('should return custom uri option', () => {
+        assert.isDefined(element.renderCustomURIOption());
+      });
+
+      it('should not return custom uri option when `hideCustom` is enabled', () => {
+        element.hideCustom = true;
+        assert.isUndefined(element.renderCustomURIOption());
+      });
+    });
   });
 
   describe('With fixed baseUri', () => {
