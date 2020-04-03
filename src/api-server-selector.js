@@ -1,4 +1,4 @@
-import { html, LitElement } from 'lit-element';
+import { html, LitElement, css } from 'lit-element';
 import { AmfHelperMixin } from '@api-components/amf-helper-mixin/amf-helper-mixin.js';
 import { EventsTargetMixin } from '@advanced-rest-client/events-target-mixin/events-target-mixin.js';
 import '@anypoint-web-components/anypoint-input/anypoint-input.js';
@@ -74,6 +74,21 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
   constructor() {
     super();
     this.handleNavigationChange = this.handleNavigationChange.bind(this);
+  }
+
+  get styles() {
+    return css`
+    :host{
+      display: block;
+    }
+
+    .icon {
+      display: inline-block;
+      width: 24px;
+      height: 24px;
+      fill: currentColor;
+    }
+    `;
   }
 
   set servers(value) {
@@ -409,7 +424,8 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
 
   render() {
     const isCustom = this._selectedType === 'custom';
-    return html`<div>
+    return html`<style>${this.styles}</style>
+    <div>
       ${isCustom
         ? this._renderUriInput()
         : this._renderDropdown()}
