@@ -365,7 +365,7 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
   renderExtraSlot() {
     const { extraOptions } = this;
     if (extraOptions) {
-      return html`<slot name="api-server-extra-slot"></slot>`;
+      return html`<slot name="custom-base-uri"></slot>`;
     }
     return '';
   }
