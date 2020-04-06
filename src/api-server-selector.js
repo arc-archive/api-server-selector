@@ -333,7 +333,7 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
    */
   _getExtraServers() {
     const slot = this.shadowRoot.querySelector('slot[name="custom-base-uri"]');
-    return slot ? Array.from(slot.assignedElements()) : [];
+    return slot ? slot.assignedElements() : [];
   }
 
   /**
