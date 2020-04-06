@@ -69,7 +69,7 @@ describe('<api-server-selector>', () => {
 
     it('should render empty extra servers slot', () => {
       assert.exists(element.shadowRoot.querySelector('slot[name="custom-base-uri"]'));
-      assert.lengthOf(element.shadowRoot.querySelector('slot[name="custom-base-uri"]').assignedNodes(), 0)
+      assert.lengthOf(element.shadowRoot.querySelector('slot[name="custom-base-uri"]').assignedElements(), 0)
     });
 
     it('should return uri after setting it', () => {
@@ -168,7 +168,7 @@ describe('<api-server-selector>', () => {
     });
 
     it('should have two assigned nodes to slot', () => {
-      assert.lengthOf(element.shadowRoot.querySelector('slot[name="custom-base-uri"]').assignedNodes(), 2);
+      assert.lengthOf(element.shadowRoot.querySelector('slot[name="custom-base-uri"]').assignedElements(), 2);
     });
 
     it('should have customUri at last index', () => {

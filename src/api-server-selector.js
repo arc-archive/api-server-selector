@@ -326,14 +326,14 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
   }
 
   /**
-   * Retrieves custom base uris nodes assigned to the
+   * Retrieves custom base uris elements assigned to the
    * custom-base-uri slot
    *
-   * @return {Array} Nodes assigned to custom-base-uri slot
+   * @return {Array} Elements assigned to custom-base-uri slot
    */
   _getExtraServers() {
     const slot = this.shadowRoot.querySelector('slot[name="custom-base-uri"]');
-    return slot ? slot.assignedNodes() : [];
+    return slot ? Array.from(slot.assignedElements()) : [];
   }
 
   /**
@@ -342,23 +342,15 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
    * @return {Number} custom base uri option's index
    */
   _getCustomUriIndex() {
-    let { servers } = this
-    if (!servers) {
-      servers = [];
-    }
-    const serversLength = servers.length;
+    let { servers = [] } = this
     const extraServers = this._getExtraServers();
-    return serversLength + extraServers.length;
+    return servers.length + extraServers.length;
   }
 
   _getSelectedType(selectedIndex) {
-    let { servers } = this
-    if (!servers) {
-      servers = [];
-    }
-    const serversLength = servers.length;
+    let { servers = [] } = this
     const customUriIndex = this._getCustomUriIndex()
-    if (selectedIndex < serversLength) {
+    if (selectedIndex < servers.length) {
       return 'server';
     } else if (selectedIndex === customUriIndex) {
       return 'custom';
