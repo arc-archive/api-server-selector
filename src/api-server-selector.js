@@ -26,7 +26,7 @@ import { close } from '@advanced-rest-client/arc-icons/ArcIcons.js';
  * Adding extra slot:
  * This component renders a `slot` element to render anything the users wants
  * to add in there. To enable this, sit the `extraOptions` value in this component
- * to true, and render an element associated to the slot name `api-server-extra-slot`.
+ * to true, and render an element associated to the slot name `custom-base-uri`.
  * The items rendered in this slot should be `anypoint-item` components, and have a
  * `value` attribute. This is the value that will be dispatched in the `api-server-changed`
  * event.
@@ -42,10 +42,6 @@ import { close } from '@advanced-rest-client/arc-icons/ArcIcons.js';
 export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitElement)) {
   static get properties() {
     return {
-      /**
-       * If set to true, it will render extra options slots
-       */
-      extraOptions: { type: Boolean },
       /**
        * The baseUri to override any server definition
        */
@@ -121,6 +117,21 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
 
   get amf() {
     return this._amf;
+  }
+
+  get baseUri() {
+    return this._baseUri;
+  }
+
+  set baseUri(value) {
+    if (this._baseUri === value) {
+      return;
+    }
+
+    this._selectedIndex = this._getCustomUriIndex();
+    this._selectedType = 'custom';
+    this._selectedValue = value;
+    this._baseUri = value;
   }
 
   get methodId() {
@@ -314,15 +325,42 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
     this.uri = uri;
   }
 
+  /**
+   * Retrieves custom base uris nodes assigned to the
+   * custom-base-uri slot
+   *
+   * @return {Array} Nodes assigned to custom-base-uri slot
+   */
+  _getExtraServers() {
+    const slot = this.shadowRoot.querySelector('slot[name="custom-base-uri"]');
+    return slot ? slot.assignedNodes() : [];
+  }
+
+  /**
+   * Retrieves custom base uri option's index
+   *
+   * @return {Number} custom base uri option's index
+   */
+  _getCustomUriIndex() {
+    let { servers } = this
+    if (!servers) {
+      servers = [];
+    }
+    const serversLength = servers.length;
+    const extraServers = this._getExtraServers();
+    return serversLength + extraServers.length;
+  }
+
   _getSelectedType(selectedIndex) {
     let { servers } = this
     if (!servers) {
-      servers = []
+      servers = [];
     }
-    const serversLength = servers.length
+    const serversLength = servers.length;
+    const customUriIndex = this._getCustomUriIndex()
     if (selectedIndex < serversLength) {
       return 'server';
-    } else if (selectedIndex === serversLength) {
+    } else if (selectedIndex === customUriIndex) {
       return 'custom';
     } else {
       return 'extra';
@@ -339,8 +377,8 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
   renderItems() {
     return html`
       ${this.renderServerOptions()}
-      ${this.renderCustomURIOption()}
       ${this.renderExtraSlot()}
+      ${this.renderCustomURIOption()}
     `;
   }
 
@@ -353,7 +391,6 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
     const { servers } = this;
 
     const toAnypointItem = (server) => {
-
       return html`<anypoint-item value="${this._getServerValue(server)}">
         ${this._getServerUri(server)}
       </anypoint-item>`;
@@ -372,17 +409,11 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
   }
 
   /**
-   * Returns template result with `slot` element if
-   * `extraOptions` attribute is enabled, or undefined if
-   * it is not.
-   * @return {TemplateResult|undefined}
+   * Returns template result with `slot` element
+   * @return {TemplateResult}
    */
   renderExtraSlot() {
-    const { extraOptions } = this;
-    if (extraOptions) {
-      return html`<slot name="custom-base-uri"></slot>`;
-    }
-    return '';
+    return html`<slot name="custom-base-uri"></slot>`;
   }
 
   _handleUriChange(event) {

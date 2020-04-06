@@ -13,7 +13,14 @@ describe('<api-server-selector>', () => {
   }
 
   async function extraOptionsFixture() {
-    return (await fixture(`<api-server-selector extraOptions></api-server-selector>`));
+    return (await fixture(`<api-server-selector>
+                                        <anypoint-item slot="custom-base-uri" value="http://customServer.com">
+                                          http://customServer.com
+                                        </anypoint-item>
+                                        <anypoint-item slot="custom-base-uri" value="http://customServer2.com">
+                                          http://customServer2.com
+                                        </anypoint-item>
+                                    </api-server-selector>`));
   }
 
   async function baseUriFixture() {
@@ -60,8 +67,9 @@ describe('<api-server-selector>', () => {
       assert.isEmpty(element.shadowRoot.querySelector('.uri-input').value);
     });
 
-    it('should not render extra slot', () => {
-      assert.notExists(element.shadowRoot.querySelector('slot [name="api-server-extra-slot"]'));
+    it('should render empty extra servers slot', () => {
+      assert.exists(element.shadowRoot.querySelector('slot[name="custom-base-uri"]'));
+      assert.lengthOf(element.shadowRoot.querySelector('slot[name="custom-base-uri"]').assignedNodes(), 0)
     });
 
     it('should return uri after setting it', () => {
@@ -94,6 +102,15 @@ describe('<api-server-selector>', () => {
     it('should render `Custom URI` option by default', () => {
       assert.exists(element.shadowRoot.querySelector('.custom-option'));
     });
+
+    it('should set baseUri and render as Custom even when `hideCustom` is enabled', async () => {
+      element = await baseUriFixture();
+      await nextFrame();
+      element.hideCustom = true;
+      assert.equal(element.uri, 'https://www.google.com');
+      assert.equal(element.baseUri, 'https://www.google.com');
+      assert.equal(element.selectedType, 'custom');
+    })
 
     it('should not render `Custom URI` when `hideCustom` is enabled', async () => {
       element = await hideCustomFixture()
@@ -129,6 +146,13 @@ describe('<api-server-selector>', () => {
       element.uri = 'test uri';
       assert.equal(element.uri, 'https://www.google.com');
     })
+
+    it('should update when new baseUri is set', () => {
+      element.baseUri = 'https://www.google.com/v1';
+      assert.equal(element.uri, 'https://www.google.com/v1');
+      assert.equal(element.baseUri, 'https://www.google.com/v1');
+      assert.equal(element.selectedType, 'custom');
+    })
   });
 
   describe('With extra options', () => {
@@ -139,9 +163,17 @@ describe('<api-server-selector>', () => {
       await nextFrame();
     });
 
-    it('should render extra slot when extraOptions is set', () => {
-      assert.notExists(element.shadowRoot.querySelector('slot [name="api-server-extra-slot"]'));
+    it('should render extra servers slot', () => {
+      assert.exists(element.shadowRoot.querySelector('slot[name="custom-base-uri"]'));
     });
+
+    it('should have two assigned nodes to slot', () => {
+      assert.lengthOf(element.shadowRoot.querySelector('slot[name="custom-base-uri"]').assignedNodes(), 2);
+    });
+
+    it('should have customUri at last index', () => {
+      assert.equal(element._getCustomUriIndex(), 2)
+    })
   });
 
   [
