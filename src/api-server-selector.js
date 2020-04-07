@@ -68,7 +68,7 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
 
   constructor() {
     super();
-    this.handleNavigationChange = this.handleNavigationChange.bind(this);
+    this._handleNavigationChange = this._handleNavigationChange.bind(this);
   }
 
   get styles() {
