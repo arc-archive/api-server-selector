@@ -207,7 +207,7 @@ describe('<api-server-selector>', () => {
           selected: endpointId,
           type: 'endpoint',
         };
-        element.handleNavigationChange({ detail });
+        element._handleNavigationChange({ detail });
         assert.lengthOf(element._renderServerOptions(), 1);
       });
 
@@ -221,7 +221,7 @@ describe('<api-server-selector>', () => {
           type: 'method',
           endpointId,
         };
-        element.handleNavigationChange({ detail });
+        element._handleNavigationChange({ detail });
         assert.lengthOf(element._renderServerOptions(), 2);
       });
     });

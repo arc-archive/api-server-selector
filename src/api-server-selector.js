@@ -189,15 +189,15 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
 
   _attachListeners(node) {
     super._attachListeners(node);
-    node.addEventListener('api-navigation-selection-changed', this.handleNavigationChange);
+    node.addEventListener('api-navigation-selection-changed', this._handleNavigationChange);
   }
 
   _detachListeners(node) {
     super._detachListeners(node);
-    node.removeEventListener('api-navigation-selection-changed', this.handleNavigationChange);
+    node.removeEventListener('api-navigation-selection-changed', this._handleNavigationChange);
   }
 
-  handleNavigationChange(e) {
+  _handleNavigationChange(e) {
     const { selected, type, endpointId } = e.detail;
     const serverDefinitionAllowedTypes = ['endpoint', 'method'];
     if (serverDefinitionAllowedTypes.indexOf(type) === -1) {
