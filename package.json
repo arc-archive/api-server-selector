@@ -29,6 +29,7 @@
     "format:prettier": "prettier \"**/*.js\" --write --ignore-path .gitignore",
     "lint": "npm run lint:eslint && npm run lint:prettier",
     "format": "npm run format:eslint && npm run format:prettier",
+    "update-types": "gen-typescript-declarations --deleteExisting --outDir .",
     "test": "karma start --coverage",
     "test:sl": "karma start karma.sl.config.js --compatibility auto --coverage",
     "test:watch": "karma start --auto-watch=true --single-run=false",
@@ -47,6 +48,7 @@
     "@anypoint-web-components/anypoint-item": "^1.0.5",
     "@anypoint-web-components/anypoint-listbox": "^1.0.4",
     "@api-components/amf-helper-mixin": "^4.0.24",
+    "@polymer/gen-typescript-declarations": "^1.6.2",
     "lit-element": "^2.3.1",
     "lit-html": "^1.2.1"
   },
