@@ -32,7 +32,7 @@ describe('<api-server-selector>', () => {
     const detail = {
       value: index,
     };
-    element.handleSelectionChanged({ detail, target });
+    element._handleSelectionChanged({ detail, target });
   }
 
   describe('Basic - No model', () => {
@@ -82,7 +82,7 @@ describe('<api-server-selector>', () => {
       const detail = {
         value: 0,
       };
-      element.handleSelectionChanged({ detail, target });
+      element._handleSelectionChanged({ detail, target });
       assert.equal(element._selectedIndex, 0);
       assert.equal(element._selectedValue, 'custom');
     });
@@ -92,7 +92,7 @@ describe('<api-server-selector>', () => {
       const detail = {
         value: 0,
       };
-      element.handleSelectionChanged({ detail, target });
+      element._handleSelectionChanged({ detail, target });
       element._resetSelection();
       assert.equal(element._selectedIndex, undefined);
       assert.equal(element._selectedValue, undefined);
@@ -120,12 +120,12 @@ describe('<api-server-selector>', () => {
 
     describe('renderCustomURIOption()', () => {
       it('should return custom uri option', () => {
-        assert.isNotEmpty(element.renderCustomURIOption());
+        assert.isNotEmpty(element._renderCustomURIOption());
       });
 
       it('should not return custom uri option when `hideCustom` is enabled', () => {
         element.hideCustom = true;
-        assert.isEmpty(element.renderCustomURIOption());
+        assert.isEmpty(element._renderCustomURIOption());
       });
     });
   });
@@ -180,7 +180,7 @@ describe('<api-server-selector>', () => {
     ['Compact model', true],
     ['Regular model', false]
   ].forEach((item) => {
-    describe('renderServerOptions()', () => {
+    describe('_renderServerOptions()', () => {
       let amf;
       let element;
 
@@ -193,11 +193,11 @@ describe('<api-server-selector>', () => {
 
       it('Returns empty array when servers is null', () => {
         element.servers = null;
-        assert.lengthOf(element.renderServerOptions(), 0);
+        assert.lengthOf(element._renderServerOptions(), 0);
       });
 
       it('Returns servers for document', () => {
-        assert.lengthOf(element.renderServerOptions(), 4);
+        assert.lengthOf(element._renderServerOptions(), 4);
       });
 
       it('Returns servers for endpoint', () => {
@@ -208,7 +208,7 @@ describe('<api-server-selector>', () => {
           type: 'endpoint',
         };
         element.handleNavigationChange({ detail });
-        assert.lengthOf(element.renderServerOptions(), 1);
+        assert.lengthOf(element._renderServerOptions(), 1);
       });
 
       it('Returns servers for method', () => {
@@ -222,11 +222,11 @@ describe('<api-server-selector>', () => {
           endpointId,
         };
         element.handleNavigationChange({ detail });
-        assert.lengthOf(element.renderServerOptions(), 2);
+        assert.lengthOf(element._renderServerOptions(), 2);
       });
     });
 
-    describe('handleSelectionChanged()', () => {
+    describe('_handleSelectionChanged()', () => {
       let amf;
       let element;
 

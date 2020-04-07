@@ -11,14 +11,16 @@ class DemoPage extends ApiDemoPage {
     this.initObservableProperties([
       'demoState',
       'outlined',
-      'extraOptions',
+      'renderCustom',
       'servers',
+      'selectedServer',
     ]);
-    this._componentName = 'api-server-selector';
+    this.componentName = 'api-server-selector';
     this.renderViewControls = true;
     this.darkThemeActive = false;
     this.demoStates = ['Filled', 'Outlined', 'Anypoint'];
-    this.extraOptions = false;
+    this.renderCustom = false;
+    this._apiSrvHandler = this._apiSrvHandler.bind(this);
   }
 
   _demoStateHandler(e) {
@@ -56,6 +58,10 @@ class DemoPage extends ApiDemoPage {
     console.log(this.servers);
   }
 
+  _apiSrvHandler(e) {
+    const { value } = e.detail;
+    this.selectedServer = value;
+  }
 
   _demoTemplate() {
     const {
@@ -65,8 +71,8 @@ class DemoPage extends ApiDemoPage {
       compatibility,
       outlined,
       demoState,
-      extraOptions,
       servers,
+      selectedServer,
     } = this;
     return html`
       <section class="documentation-section">
@@ -87,22 +93,38 @@ class DemoPage extends ApiDemoPage {
             .amf="${amf}"
             ?compatibility="${compatibility}"
             ?outlined="${outlined}"
-            ?extraOptions="${extraOptions}"
             .servers="${servers}"
             slot="content"
-          ></api-server-selector>
+            @api-server-changed="${this._apiSrvHandler}"
+          >
+          ${this._extraSlotItems()}
+          </api-server-selector>
 
           <label slot="options" id="mainOptionsLabel">Options</label>
           <anypoint-checkbox
             aria-describedby="mainOptionsLabel"
             slot="options"
-            name="extraOptions"
+            name="renderCustom"
             @change="${this._toggleMainOption}"
-            >Extra options</anypoint-checkbox
+            >Add custom srv</anypoint-checkbox
           >
         </arc-interactive-demo>
+
+        ${selectedServer ? html`<p>Selected: ${selectedServer}</p>` : ''}
       </section>
     `;
+  }
+
+  _extraSlotItems() {
+    if (!this.renderCustom) {
+      return;
+    }
+    return html`<anypoint-item slot="custom-base-uri" value="http://customServer.com">
+      http://customServer.com
+    </anypoint-item>
+    <anypoint-item slot="custom-base-uri" value="http://customServer2.com">
+      http://customServer2.com
+    </anypoint-item>`;
   }
 
   contentTemplate() {
