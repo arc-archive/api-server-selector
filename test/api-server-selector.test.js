@@ -128,6 +128,23 @@ describe('<api-server-selector>', () => {
         assert.isEmpty(element._renderCustomURIOption());
       });
     });
+
+    it('should dispatch `api-server-changed` event', async () => {
+      element = await baseUriFixture();
+      let event;
+      const handler = (e) => {
+        event = e;
+      }
+      element.addEventListener('api-server-changed', handler);
+      element.selectedType = 'custom';
+      element.uri = 'https://example.com';
+      await nextFrame();
+      assert.deepEqual(event.detail, {
+        value: 'https://example.com',
+        selectedValue: 'https://example.com',
+        selectedType: 'custom',
+      })
+    });
   });
 
   describe('With fixed baseUri', () => {

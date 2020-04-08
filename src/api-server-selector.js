@@ -171,9 +171,14 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
       return;
     }
     this._uri = value;
+    const selectedType = this.selectedType;
     this.dispatchEvent(
       new CustomEvent('api-server-changed', {
-        detail: { value },
+        detail: { 
+          value,
+          selectedValue: value,
+          selectedType,
+         },
         bubbles: true,
         composed: true,
       }),
@@ -378,8 +383,8 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
     const { styles, isCustom } = this;
     return html`<style>${styles}</style>
     ${isCustom
-      ? this._renderUriInput()
-      : this._renderDropdown()}
+        ? this._renderUriInput()
+        : this._renderDropdown()}
     `;
   }
 
