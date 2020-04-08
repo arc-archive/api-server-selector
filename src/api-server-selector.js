@@ -199,7 +199,6 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
     this.dispatchEvent(
       new CustomEvent('api-server-changed', {
         detail: {
-          value,
           selectedValue: value,
           selectedType,
         },

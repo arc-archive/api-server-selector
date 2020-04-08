@@ -140,7 +140,6 @@ describe('<api-server-selector>', () => {
       element.uri = 'https://example.com';
       await nextFrame();
       assert.deepEqual(event.detail, {
-        value: 'https://example.com',
         selectedValue: 'https://example.com',
         selectedType: 'custom',
       })
