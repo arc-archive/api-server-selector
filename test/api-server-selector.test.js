@@ -145,6 +145,24 @@ describe('<api-server-selector>', () => {
         selectedType: 'custom',
       })
     });
+
+    it('should not update selectedValue if selectedType is `server` and it is not an option', async () => {
+      element = await basicFixture();
+      element.selectedType = 'server';
+      element.selectedValue = 'https://example.com';
+      assert.equal(element.selectedType, 'server');
+      assert.isUndefined(element.selectedvalue);
+      assert.isEmpty(element.uri);
+    });
+
+    it('should update selectedValue if selectedType is `custom`', async () => {
+      element = await basicFixture();
+      element.selectedType = 'custom';
+      element.selectedValue = 'https://example.com';
+      assert.equal(element.selectedType, 'custom');
+      assert.equal(element.selectedValue, 'https://example.com');
+      assert.equal(element.uri, 'https://example.com');
+    });
   });
 
   describe('With fixed baseUri', () => {
