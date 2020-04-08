@@ -413,5 +413,52 @@ describe('<api-server-selector>', () => {
         assert.lengthOf(element.servers, 2);
       });
     });
+
+    describe('_isValueValid()', () => {
+      let amf;
+      let element;
+
+      beforeEach(async () => {
+        amf = await AmfLoader.load(item[1]);
+        element = await basicFixture();
+        element.amf = amf;
+        await nextFrame();
+      });
+
+      it('should return true if `selectedType` is `custom`', () => {
+        element.selectedType = 'custom';
+        assert.isTrue(element._isValueValid());
+      });
+
+      it('should return false if server is not found', () => {
+        assert.isFalse(element._isValueValid('https://www.google.com'));
+      });
+
+      it('should return true if value is found in servers', () => {
+        assert.isTrue(element._isValueValid('https://{customerId}.saas-app.com:{port}/v2'));
+      });
+    });
+
+    describe('_getIndexForValue()', () => {
+      let amf;
+      let element;
+
+      beforeEach(async () => {
+        amf = await AmfLoader.load(item[1]);
+        element = await extraOptionsFixture();
+        element.amf = amf;
+        await nextFrame();
+      });
+
+      it('should return custom value index', async () => {
+        element.selectedType = 'custom';
+        assert.equal(element._getIndexForValue(), 6);
+      });
+
+      it('should return slot value index', async () => {
+        element.selectedType = 'slot';
+        assert.equal(element._getIndexForValue(), 5);
+      });
+    });
   });
 });
