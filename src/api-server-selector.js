@@ -98,7 +98,7 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
   }
 
   get servers() {
-    return this._servers;
+    return this._servers || [];
   }
 
   get selected() {
