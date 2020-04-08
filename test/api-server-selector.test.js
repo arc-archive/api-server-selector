@@ -128,6 +128,40 @@ describe('<api-server-selector>', () => {
         assert.isEmpty(element._renderCustomURIOption());
       });
     });
+
+    it('should dispatch `api-server-changed` event', async () => {
+      element = await baseUriFixture();
+      let event;
+      const handler = (e) => {
+        event = e;
+      }
+      element.addEventListener('api-server-changed', handler);
+      element.selectedType = 'custom';
+      element.uri = 'https://example.com';
+      await nextFrame();
+      assert.deepEqual(event.detail, {
+        selectedValue: 'https://example.com',
+        selectedType: 'custom',
+      })
+    });
+
+    it('should not update selectedValue if selectedType is `server` and it is not an option', async () => {
+      element = await basicFixture();
+      element.selectedType = 'server';
+      element.selectedValue = 'https://example.com';
+      assert.equal(element.selectedType, 'server');
+      assert.isUndefined(element.selectedvalue);
+      assert.isEmpty(element.uri);
+    });
+
+    it('should update selectedValue if selectedType is `custom`', async () => {
+      element = await basicFixture();
+      element.selectedType = 'custom';
+      element.selectedValue = 'https://example.com';
+      assert.equal(element.selectedType, 'custom');
+      assert.equal(element.selectedValue, 'https://example.com');
+      assert.equal(element.uri, 'https://example.com');
+    });
   });
 
   describe('With fixed baseUri', () => {
@@ -376,6 +410,53 @@ describe('<api-server-selector>', () => {
         assert.equal(element.endpointId, endpointId);
         assert.equal(element.methodId, methodId);
         assert.lengthOf(element.servers, 2);
+      });
+    });
+
+    describe('_isValueValid()', () => {
+      let amf;
+      let element;
+
+      beforeEach(async () => {
+        amf = await AmfLoader.load(item[1]);
+        element = await basicFixture();
+        element.amf = amf;
+        await nextFrame();
+      });
+
+      it('should return true if `selectedType` is `custom`', () => {
+        element.selectedType = 'custom';
+        assert.isTrue(element._isValueValid());
+      });
+
+      it('should return false if server is not found', () => {
+        assert.isFalse(element._isValueValid('https://www.google.com'));
+      });
+
+      it('should return true if value is found in servers', () => {
+        assert.isTrue(element._isValueValid('https://{customerId}.saas-app.com:{port}/v2'));
+      });
+    });
+
+    describe('_getIndexForValue()', () => {
+      let amf;
+      let element;
+
+      beforeEach(async () => {
+        amf = await AmfLoader.load(item[1]);
+        element = await extraOptionsFixture();
+        element.amf = amf;
+        await nextFrame();
+      });
+
+      it('should return custom value index', async () => {
+        element.selectedType = 'custom';
+        assert.equal(element._getIndexForValue(), 6);
+      });
+
+      it('should return slot value index', async () => {
+        element.selectedType = 'slot';
+        assert.equal(element._getIndexForValue(), 5);
       });
     });
   });

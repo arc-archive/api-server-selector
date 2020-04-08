@@ -63,6 +63,7 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
       selectedType: { type: String },
       _selectedIndex: { type: Number },
       _selectedValue: { type: String },
+      hidden: { type: Boolean },
     };
   }
 
@@ -75,6 +76,10 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
     return css`
     :host{
       display: block;
+    }
+
+    :host([hidden]) {
+      display: none;
     }
 
     .icon {
@@ -98,7 +103,7 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
   }
 
   get servers() {
-    return this._servers;
+    return this._servers || [];
   }
 
   get selected() {
@@ -136,6 +141,25 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
     this.requestUpdate('baseUri', old);
   }
 
+  get selectedValue() {
+    return this._selectedValue;
+  }
+
+  set selectedValue(value) {
+    const old = this._selectedValue;
+    if (old === value) {
+      return;
+    }
+
+    if (this._isValueValid(value)) {
+      const selectedIndex = this._getIndexForValue(value)
+      const selectedValue = value;
+      this._selectedIndex = selectedIndex;
+      this._selectedValue = selectedValue;
+      this.uri = selectedValue;
+    }
+  }
+
   get methodId() {
     return this._methodId;
   }
@@ -171,9 +195,13 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
       return;
     }
     this._uri = value;
+    const selectedType = this.selectedType;
     this.dispatchEvent(
       new CustomEvent('api-server-changed', {
-        detail: { value },
+        detail: {
+          selectedValue: value,
+          selectedType,
+        },
         bubbles: true,
         composed: true,
       }),
@@ -195,6 +223,32 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
   _detachListeners(node) {
     super._detachListeners(node);
     node.removeEventListener('api-navigation-selection-changed', this._handleNavigationChange);
+  }
+
+  _isValueValid(value) {
+    if (this.isCustom) {
+      return true;
+    }
+
+    return Boolean(this._findServerByValue(value));
+  }
+
+  _findServerByValue(value) {
+    const { servers = [] } = this;
+    return servers.find(server => this._getServerUri(server) === value)
+  }
+
+  _getIndexForValue(value) {
+    if (this.isCustom) {
+      return this._getCustomUriIndex();
+    }
+
+    if (this.selectedType === 'slot') {
+      return this._getCustomUriIndex() - 1;
+    }
+
+    const server = this._findServerByValue(value);
+    return this._getIndexOfServer(this._getServerValue(server), this.servers);
   }
 
   _handleNavigationChange(e) {
@@ -361,7 +415,7 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
     } else if (selectedIndex === customUriIndex) {
       return 'custom';
     } else {
-      return 'extra';
+      return 'slot';
     }
   }
 
@@ -378,8 +432,8 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
     const { styles, isCustom } = this;
     return html`<style>${styles}</style>
     ${isCustom
-      ? this._renderUriInput()
-      : this._renderDropdown()}
+        ? this._renderUriInput()
+        : this._renderDropdown()}
     `;
   }
 
