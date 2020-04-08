@@ -63,6 +63,7 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
       selectedType: { type: String },
       _selectedIndex: { type: Number },
       _selectedValue: { type: String },
+      hidden: { type: Boolean },
     };
   }
 
@@ -75,6 +76,10 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
     return css`
     :host{
       display: block;
+    }
+
+    :host([hidden]) {
+      display: none;
     }
 
     .icon {
