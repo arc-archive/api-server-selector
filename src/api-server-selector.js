@@ -56,7 +56,6 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
       servers: { type: Array },
       endpointId: { type: String },
       methodId: { type: String },
-      // uri: { type: String },
       /**
        * Currently selected type of an base URI.
        * `server` | `slot` | `custom`
