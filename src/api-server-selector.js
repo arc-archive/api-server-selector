@@ -81,7 +81,7 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
     if (super.connectedCallback) {
       super.connectedCallback();
     }
-    this._observeSlotItem();
+    this._notifyServersCount()
   }
 
   disconnectedCallback() {
@@ -89,7 +89,6 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
     if (super.disconnectedCallback) {
       super.disconnectedCallback();
     }
-    this._unobserveSlotItem();
   }
 
   get styles() {
@@ -236,24 +235,7 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
     node.removeEventListener('api-navigation-selection-changed', this._handleNavigationChange);
   }
 
-  /**
-   * Observers changes in custom base uri slot
-   */
-  _observeSlotItem() {
-    const slot = this.shadowRoot.querySelector('slot[name="custom-base-uri"]');
-    if (slot) slot.addEventListener('slotchange', this._handleSlotChange);
-  }
-
-  /**
-   * Remove change observers from custom base uri slot
-   */
-  _unobserveSlotItem() {
-    const slot = this.shadowRoot.querySelector('slot[name="custom-base-uri"]');
-    if (slot) slot.removeEventListener('slotchange', this._handleSlotChange);
-  }
-
-
-  _handleSlotChange() {
+  _notifyServersCount() {
     const serversCount = this._getServersCount();
     this.dispatchEvent(
       new CustomEvent('api-servers-count-changed', {
@@ -567,7 +549,7 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
    * @return {TemplateResult}
    */
   _renderExtraSlot() {
-    return html`<slot @slotchange="${this._handleSlotChange}" name="custom-base-uri"></slot>`;
+    return html`<slot @slotchange="${this._notifyServersCount}" name="custom-base-uri"></slot>`;
   }
 
   _renderUriInput() {
