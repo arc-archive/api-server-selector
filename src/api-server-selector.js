@@ -56,13 +56,17 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
       servers: { type: Array },
       endpointId: { type: String },
       methodId: { type: String },
-      uri: { type: String },
       /**
        * Currently selected type of an base URI.
+       * `server` | `slot` | `custom`
        */
       selectedType: { type: String },
+      /**
+       * Current value of the server
+       * Always a URI value
+       */
+      selectedValue: { type: String },
       _selectedIndex: { type: Number },
-      _selectedValue: { type: String },
       hidden: { type: Boolean },
     };
   }
@@ -142,10 +146,13 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
   }
 
   get selectedValue() {
-    return this._selectedValue;
+    return this.baseUri || this._selectedValue;
   }
 
   set selectedValue(value) {
+    if (this.baseUri) {
+      return;
+    }
     const old = this._selectedValue;
     if (old === value) {
       return;
@@ -154,9 +161,20 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
     if (this._isValueValid(value)) {
       const selectedIndex = this._getIndexForValue(value)
       const selectedValue = value;
+      const selectedType = this.selectedType;
       this._selectedIndex = selectedIndex;
       this._selectedValue = selectedValue;
-      this.uri = selectedValue;
+      this.requestUpdate('selectedValue', old);
+      this.dispatchEvent(
+        new CustomEvent('api-server-changed', {
+          detail: {
+            selectedValue,
+            selectedType,
+          },
+          bubbles: true,
+          composed: true,
+        }),
+      );
     }
   }
 
@@ -185,29 +203,6 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
     this._endpointId = value;
   }
 
-  get uri() {
-    return this.baseUri || this._uri || '';
-  }
-
-  set uri(value) {
-    const old = this._uri;
-    if (value === old) {
-      return;
-    }
-    this._uri = value;
-    const selectedType = this.selectedType;
-    this.dispatchEvent(
-      new CustomEvent('api-server-changed', {
-        detail: {
-          selectedValue: value,
-          selectedType,
-        },
-        bubbles: true,
-        composed: true,
-      }),
-    );
-  }
-
   /**
    * @return {Boolean} True if selected type is "custom" type.
    */
@@ -226,16 +221,48 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
   }
 
   _isValueValid(value) {
-    if (this.isCustom) {
+    if (!this.selectedType && !value) {
       return true;
     }
-
-    return Boolean(this._findServerByValue(value));
+    switch (this.selectedType) {
+      case 'server':
+        return Boolean(this._findServerByValue(value));
+      case 'slot':
+        return this._getIndexForSlotValue(value) > -1;
+      case 'custom':
+        return true;
+      default:
+        return !value;
+    }
   }
 
   _findServerByValue(value) {
-    const { servers = [] } = this;
+    const { servers } = this;
+    if (!servers) {
+      return undefined;
+    }
     return servers.find(server => this._getServerUri(server) === value)
+  }
+
+  _findServerById(id) {
+    const { servers } = this;
+    if (!servers) {
+      return undefined;
+    }
+    return servers.find(server => this._getServerValue(server) === id)
+  }
+
+  _getIndexForSlotValue(value) {
+    let { servers } = this;
+    if (!servers) {
+      servers = [];
+    }
+    const extraServers = this._getExtraServers();
+    if (!extraServers) {
+      return -1;
+    }
+    const server = extraServers.find(elem => elem.getAttribute('value') === value);
+    return extraServers.indexOf(server) + servers.length;
   }
 
   _getIndexForValue(value) {
@@ -244,11 +271,15 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
     }
 
     if (this.selectedType === 'slot') {
-      return this._getCustomUriIndex() - 1;
+      return this._getIndexForSlotValue(value);
     }
 
-    const server = this._findServerByValue(value);
-    return this._getIndexOfServer(this._getServerValue(server), this.servers);
+    if (this.selectedType === 'server') {
+      const server = this._findServerByValue(value);
+      return this._getIndexOfServer(this._getServerValue(server), this.servers);
+    }
+
+    return undefined;
   }
 
   _handleNavigationChange(e) {
@@ -274,7 +305,7 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
       newIndex = undefined;
       newValue = undefined;
     } else if (isModelServerSelected) {
-      const indexInNewServers = this._getIndexOfServer(this._selectedValue, this.servers)
+      const indexInNewServers = this._getIndexOfServerByUri(this._selectedValue, this.servers)
       if (indexInNewServers > -1) {
         newIndex = indexInNewServers;
       } else {
@@ -286,6 +317,16 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
       newIndex = this._selectedIndex + serverOffest;
     }
     this._changeSelected({ selectedIndex: newIndex, selectedValue: newValue })
+  }
+
+  _getIndexOfServerByUri(value, servers) {
+    for (let i = 0; i < servers.length; i++) {
+      const server = servers[i];
+      if (this._getServerUri(server) === value) {
+        return i;
+      }
+    }
+    return -1;
   }
 
   /**
@@ -339,50 +380,49 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
    */
   _handleSelectionChanged(e) {
     const { selectedItem } = e.target;
-    const { value } = e.detail;
+    const selectedIndex = e.detail.value;
     if (!selectedItem) {
       return;
     }
-    const selectedValue = selectedItem.getAttribute('value');
-    if (selectedValue === this._selectedValue) {
+    let selectedValue = selectedItem.getAttribute('value');
+    if (this._isServerIndex(selectedIndex)) {
+      selectedValue = this._getServerUri(this._findServerById(selectedValue));
+    } else if (this._isCustomIndex(selectedIndex) && !this.isCustom) {
+      selectedValue = '';
+    }
+    if (selectedValue === this.selectedValue) {
       return;
     }
-    this._changeSelected({ selectedIndex: value, selectedValue });
+    this._changeSelected({ selectedIndex, selectedValue });
+  }
+
+  _isServerIndex(index) {
+    const { servers } = this;
+    if (!servers) {
+      return false;
+    }
+    return index < servers.length;
+  }
+
+  _isCustomIndex(index) {
+    return index === this._getCustomUriIndex();
   }
 
   /**
    *
    * @param {?Object} params Composed object
    * @param {?Number} params.selectedIndex The index of the selected item in the listbox
-   * @param {?String} params.selectedValue The value of the selected item in the listbox
+   * @param {?String} params.selectedValue The URI value of the selected item in the listbox
    */
   _changeSelected({ selectedIndex, selectedValue } = {}) {
-    const oldValue = this._selectedValue;
+    const oldValue = this.selectedValue;
     if (selectedIndex === this._selectedIndex && selectedValue === oldValue) {
       return;
     }
     const selectedType = this._getSelectedType(selectedIndex);
-    this._setUri({ selectedIndex, selectedValue, selectedType });
-    this._selectedIndex = selectedIndex;
-    this._selectedValue = selectedValue;
     this.selectedType = selectedType;
-  }
-
-  _setUri({ selectedIndex, selectedValue, selectedType }) {
-    let uri;
-    if (selectedType === 'server') {
-      uri = this._getServerUri(this.servers[selectedIndex]);
-    } else if (selectedType === 'custom') {
-      if (this.selectedType === 'custom') {
-        uri = this.uri;
-      } else {
-        uri = '';
-      }
-    } else {
-      // `extra`
-      uri = selectedValue;
-    }
-    this.uri = uri;
+    this._selectedIndex = selectedIndex;
+    this.selectedValue = selectedValue;
   }
 
   /**
@@ -408,6 +448,9 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
   }
 
   _getSelectedType(selectedIndex) {
+    if (selectedIndex === null || selectedIndex === undefined) {
+      return undefined;
+    }
     const { servers = [] } = this
     const customUriIndex = this._getCustomUriIndex()
     if (selectedIndex < servers.length) {
@@ -421,7 +464,7 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
 
   _handleUriChange(event) {
     const { value } = event.target;
-    this.uri = value;
+    this.selectedValue = value;
   }
 
   _resetSelection() {
@@ -487,7 +530,7 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
   }
 
   _renderUriInput() {
-    return html`<anypoint-input class="uri-input" @input=${this._handleUriChange} value="${this.uri}">
+    return html`<anypoint-input class="uri-input" @input=${this._handleUriChange} value="${this.selectedValue}">
     <label slot="label">Base URI</label>
     <anypoint-icon-button
       aria-label="Activate to clear and close custom editor"

@@ -57,10 +57,6 @@ describe('<api-server-selector>', () => {
       assert.exists(element.shadowRoot.querySelector('.uri-input'));
     });
 
-    it('should have empty URI', () => {
-      assert.equal(element.uri, '');
-    });
-
     it('should have empty URI field', async () => {
       simulateSelection(element, 0, 'custom');
       await nextFrame();
@@ -72,11 +68,6 @@ describe('<api-server-selector>', () => {
       assert.lengthOf(element.shadowRoot.querySelector('slot[name="custom-base-uri"]').assignedElements(), 0)
     });
 
-    it('should return uri after setting it', () => {
-      element.uri = 'test uri';
-      assert.equal(element.uri, 'test uri');
-    });
-
     it('should select custom uri', () => {
       const target = { selectedItem: { getAttribute: () => 'custom' } };
       const detail = {
@@ -84,7 +75,8 @@ describe('<api-server-selector>', () => {
       };
       element._handleSelectionChanged({ detail, target });
       assert.equal(element._selectedIndex, 0);
-      assert.equal(element._selectedValue, 'custom');
+      assert.equal(element.selectedValue, '');
+      assert.equal(element.selectedType, 'custom');
     });
 
     it('should unrender uri input when clicking close', () => {
@@ -107,9 +99,9 @@ describe('<api-server-selector>', () => {
       element = await baseUriFixture();
       await nextFrame();
       element.hideCustom = true;
-      assert.equal(element.uri, 'https://www.google.com');
-      assert.equal(element.baseUri, 'https://www.google.com');
+      assert.equal(element.selectedValue, 'https://www.google.com');
       assert.equal(element.selectedType, 'custom');
+      assert.equal(element.baseUri, 'https://www.google.com');
     })
 
     it('should not render `Custom URI` when `hideCustom` is enabled', async () => {
@@ -130,14 +122,14 @@ describe('<api-server-selector>', () => {
     });
 
     it('should dispatch `api-server-changed` event', async () => {
-      element = await baseUriFixture();
+      element = await basicFixture();
       let event;
       const handler = (e) => {
         event = e;
       }
       element.addEventListener('api-server-changed', handler);
       element.selectedType = 'custom';
-      element.uri = 'https://example.com';
+      element.selectedValue = 'https://example.com';
       await nextFrame();
       assert.deepEqual(event.detail, {
         selectedValue: 'https://example.com',
@@ -151,7 +143,6 @@ describe('<api-server-selector>', () => {
       element.selectedValue = 'https://example.com';
       assert.equal(element.selectedType, 'server');
       assert.isUndefined(element.selectedvalue);
-      assert.isEmpty(element.uri);
     });
 
     it('should update selectedValue if selectedType is `custom`', async () => {
@@ -160,7 +151,6 @@ describe('<api-server-selector>', () => {
       element.selectedValue = 'https://example.com';
       assert.equal(element.selectedType, 'custom');
       assert.equal(element.selectedValue, 'https://example.com');
-      assert.equal(element.uri, 'https://example.com');
     });
   });
 
@@ -172,18 +162,18 @@ describe('<api-server-selector>', () => {
       await nextFrame();
     });
 
-    it('should have baseUri as uri', () => {
-      assert.equal(element.uri, 'https://www.google.com');
+    it('should have baseUri as selectedValue', () => {
+      assert.equal(element.selectedValue, 'https://www.google.com');
     })
 
-    it('should return baseUri as uri after setting uri', () => {
-      element.uri = 'test uri';
-      assert.equal(element.uri, 'https://www.google.com');
+    it('should return baseUri as selectedValue after setting selectedValue', () => {
+      element.selectedValue = 'test uri';
+      assert.equal(element.selectedValue, 'https://www.google.com');
     })
 
     it('should update when new baseUri is set', () => {
       element.baseUri = 'https://www.google.com/v1';
-      assert.equal(element.uri, 'https://www.google.com/v1');
+      assert.equal(element.selectedValue, 'https://www.google.com/v1');
       assert.equal(element.baseUri, 'https://www.google.com/v1');
       assert.equal(element.selectedType, 'custom');
     })
@@ -277,14 +267,16 @@ describe('<api-server-selector>', () => {
         const id = server['@id'];
         const index = AmfHelper.indexOfServer(element, encodes, id);
         simulateSelection(element, index, id);
-        assert.equal(element._selectedValue, id);
+        assert.equal(element.selectedValue, 'https://{customerId}.saas-app.com:{port}/v2');
+        assert.equal(element.selectedType, 'server');
         assert.equal(element._selectedIndex, index);
       });
 
       it('should select custom uri', () => {
         const index = element.servers.length;
         simulateSelection(element, index, 'custom');
-        assert.equal(element._selectedValue, 'custom');
+        assert.equal(element.selectedValue, '');
+        assert.equal(element.selectedType, 'custom');
         assert.equal(element._selectedIndex, index);
       });
     })
@@ -327,7 +319,8 @@ describe('<api-server-selector>', () => {
         simulateSelection(element, 0, 'custom');
         element.amf = amf;
         assert.equal(element._selectedIndex, element.servers.length);
-        assert.equal(element._selectedValue, 'custom');
+        assert.equal(element.selectedValue, '');
+        assert.equal(element.selectedType, 'custom');
       });
 
       it('should update index if servers change and selected is in new servers', () => {
@@ -338,7 +331,8 @@ describe('<api-server-selector>', () => {
         simulateSelection(element, index, id);
         element.servers = [...element.servers];
         assert.isDefined(element._selectedIndex);
-        assert.isDefined(element._selectedValue);
+        assert.equal(element.selectedType, 'server');
+        assert.equal(element.selectedValue, 'https://{customerId}.saas-app.com:{port}/v2');
       });
     });
 
@@ -430,10 +424,12 @@ describe('<api-server-selector>', () => {
       });
 
       it('should return false if server is not found', () => {
+        element.selectedType = 'server';
         assert.isFalse(element._isValueValid('https://www.google.com'));
       });
 
       it('should return true if value is found in servers', () => {
+        element.selectedType = 'server';
         assert.isTrue(element._isValueValid('https://{customerId}.saas-app.com:{port}/v2'));
       });
     });
@@ -456,7 +452,7 @@ describe('<api-server-selector>', () => {
 
       it('should return slot value index', async () => {
         element.selectedType = 'slot';
-        assert.equal(element._getIndexForValue(), 5);
+        assert.equal(element._getIndexForValue(), 3);
       });
     });
   });

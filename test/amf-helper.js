@@ -33,5 +33,6 @@ AmfHelper.indexOfServer = function (element, amf, serverId) {
     amf = amf[0];
   }
   const serverKey = element._getAmfKey(element.ns.aml.vocabularies.apiContract.server);
-  return element._getValueArray(amf, serverKey).indexOf(server => server['@id'] === serverId);
+  const servers = element._getValueArray(amf, serverKey);
+  return servers.indexOf(servers.find(server => server['@id'] === serverId));
 }
