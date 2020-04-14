@@ -76,6 +76,22 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
     this._handleNavigationChange = this._handleNavigationChange.bind(this);
   }
 
+  connectedCallback() {
+    /* istanbul ignore else */
+    if (super.connectedCallback) {
+      super.connectedCallback();
+    }
+    this._observeSlotItem();
+  }
+
+  disconnectedCallback() {
+    /* istanbul ignore else */
+    if (super.disconnectedCallback) {
+      super.disconnectedCallback();
+    }
+    this._unobserveSlotItem();
+  }
+
   get styles() {
     return css`
     :host{
@@ -138,7 +154,7 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
       return;
     }
 
-    this._selectedIndex = this._getCustomUriIndex();
+    this._selectedIndex = this._getServersCount();
     this.selectedType = 'custom';
     this._selectedValue = value;
     this._baseUri = value;
@@ -220,6 +236,34 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
     node.removeEventListener('api-navigation-selection-changed', this._handleNavigationChange);
   }
 
+  /**
+   * Observers changes in custom base uri slot
+   */
+  _observeSlotItem() {
+    const slot = this.shadowRoot.querySelector('slot[name="custom-base-uri"]');
+    if (slot) slot.addEventListener('slotchange', this._handleSlotChange);
+  }
+
+  /**
+   * Remove change observers from custom base uri slot
+   */
+  _unobserveSlotItem() {
+    const slot = this.shadowRoot.querySelector('slot[name="custom-base-uri"]');
+    if (slot) slot.removeEventListener('slotchange', this._handleSlotChange);
+  }
+
+
+  _handleSlotChange() {
+    const serversCount = this._getServersCount();
+    this.dispatchEvent(
+      new CustomEvent('api-servers-count-changed', {
+        detail: { serversCount },
+        bubbles: false,
+        composed: false,
+      }),
+    );
+  }
+
   _isValueValid(value) {
     if (!this.selectedType && !value) {
       return true;
@@ -253,10 +297,7 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
   }
 
   _getIndexForSlotValue(value) {
-    let { servers } = this;
-    if (!servers) {
-      servers = [];
-    }
+    const { servers = [] } = this;
     const extraServers = this._getExtraServers();
     if (!extraServers) {
       return -1;
@@ -267,7 +308,7 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
 
   _getIndexForValue(value) {
     if (this.isCustom) {
-      return this._getCustomUriIndex();
+      return this._getServersCount();
     }
 
     if (this.selectedType === 'slot') {
@@ -405,7 +446,7 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
   }
 
   _isCustomIndex(index) {
-    return index === this._getCustomUriIndex();
+    return index === this._getServersCount();
   }
 
   /**
@@ -437,11 +478,11 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
   }
 
   /**
-   * Retrieves custom base uri option's index
+   * Retrieves the total amount of servers being rendered
    *
-   * @return {Number} custom base uri option's index
+   * @return {Number} total amount of servers being rendered
    */
-  _getCustomUriIndex() {
+  _getServersCount() {
     const { servers = [] } = this
     const extraServers = this._getExtraServers();
     return servers.length + extraServers.length;
@@ -452,7 +493,7 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
       return undefined;
     }
     const { servers = [] } = this
-    const customUriIndex = this._getCustomUriIndex()
+    const customUriIndex = this._getServersCount()
     if (selectedIndex < servers.length) {
       return 'server';
     } else if (selectedIndex === customUriIndex) {
@@ -526,7 +567,7 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
    * @return {TemplateResult}
    */
   _renderExtraSlot() {
-    return html`<slot name="custom-base-uri"></slot>`;
+    return html`<slot @slotchange="${this._handleSlotChange}" name="custom-base-uri"></slot>`;
   }
 
   _renderUriInput() {

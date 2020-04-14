@@ -22,6 +22,19 @@ describe('<api-server-selector>', () => {
                                         </anypoint-item>
                                     </api-server-selector>`));
   }
+  async function slotChangeFixture() {
+    return (await fixture(`<api-server-selector>
+                                        <anypoint-item slot="custom-base-uri" value="http://customServer.com">
+                                          http://customServer.com
+                                        </anypoint-item>
+                                        <anypoint-item slot="custom-base-uri" value="http://customServer2.com">
+                                          http://customServer2.com
+                                        </anypoint-item>
+                                        <anypoint-item value="http://customServer3.com">
+                                          http://customServer3.com
+                                        </anypoint-item>
+                                    </api-server-selector>`));
+  }
 
   async function baseUriFixture() {
     return (await fixture(`<api-server-selector baseUri="https://www.google.com"></api-server-selector>`));
@@ -195,8 +208,8 @@ describe('<api-server-selector>', () => {
       assert.lengthOf(element.shadowRoot.querySelector('slot[name="custom-base-uri"]').assignedElements(), 2);
     });
 
-    it('should have customUri at last index', () => {
-      assert.equal(element._getCustomUriIndex(), 2)
+    it('should have a total of 2 servers', () => {
+      assert.equal(element._getServersCount(), 2)
     })
   });
 
@@ -455,5 +468,36 @@ describe('<api-server-selector>', () => {
         assert.equal(element._getIndexForValue(), 3);
       });
     });
+
+    describe('handleSlotChange', () => {
+      let element;
+
+      before(async () => {
+        element = await slotChangeFixture();
+        await nextFrame();
+      });
+
+      it('should render 2 servers', () => {
+        assert.equal(element._getServersCount(), 2);
+      })
+
+      it('should dispatch api-servers-count-changed event when slot is added', async () => {
+        const toBeSlotted = element.children[2];
+        let event;
+        const handler = (e) => {
+          event = e;
+        }
+        element.addEventListener('api-servers-count-changed', handler);
+        toBeSlotted.setAttribute('slot', 'custom-base-uri');
+        await nextFrame();
+        assert.deepEqual(event.detail, {
+          serversCount: 3
+        });
+      })
+
+      it('should render 3 servers after update', () => {
+        assert.equal(element._getServersCount(), 3);
+      })
+    })
   });
 });
