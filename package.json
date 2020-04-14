@@ -1,6 +1,6 @@
 {
   "name": "@api-components/api-server-selector",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "A component that renders OAS' servers as a dropdown option to select API server.",
   "license": "Apache-2.0",
   "main": "index.js",
@@ -48,7 +48,6 @@
     "@anypoint-web-components/anypoint-item": "^1.0.5",
     "@anypoint-web-components/anypoint-listbox": "^1.0.4",
     "@api-components/amf-helper-mixin": "^4.0.24",
-    "@polymer/gen-typescript-declarations": "^1.6.2",
     "lit-element": "^2.3.1",
     "lit-html": "^1.2.1"
   },
@@ -64,6 +63,7 @@
     "@open-wc/demoing-storybook": "^1.15.2",
     "@open-wc/testing": "^2.5.10",
     "@open-wc/testing-karma": "^3.3.11",
+    "@polymer/gen-typescript-declarations": "^1.6.2",
     "@polymer/iron-test-helpers": "^3.0.1",
     "deepmerge": "^4.2.2",
     "es-dev-server": "^1.46.1",
