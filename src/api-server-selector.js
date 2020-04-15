@@ -49,7 +49,7 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
       /**
        * If activated, `Custom URI` will not be in the dropdown options
        */
-      hideCustom: { type: Boolean },
+      noCustom: { type: Boolean, reflect: true  },
       /**
        * Holds the current servers to show in in the dropdown menu
        */
@@ -66,8 +66,14 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
        * Always a URI value
        */
       selectedValue: { type: String },
+      /**
+       * Current selected server index
+       */
       _selectedIndex: { type: Number },
-      hidden: { type: Boolean },
+      /**
+       * If activated, server selector will not be visible
+       */
+      hidden: { type: Boolean, reflect: true },
     };
   }
 
@@ -76,19 +82,8 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
     this._handleNavigationChange = this._handleNavigationChange.bind(this);
   }
 
-  connectedCallback() {
-    /* istanbul ignore else */
-    if (super.connectedCallback) {
-      super.connectedCallback();
-    }
+  firstUpdated() {
     this._notifyServersCount()
-  }
-
-  disconnectedCallback() {
-    /* istanbul ignore else */
-    if (super.disconnectedCallback) {
-      super.disconnectedCallback();
-    }
   }
 
   get styles() {
@@ -119,6 +114,7 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
     this._servers = value;
     this._checkForSelectedChange(old);
     this.requestUpdate('servers', old);
+    this._notifyServersCount();
   }
 
   get servers() {
@@ -236,14 +232,10 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
   }
 
   _notifyServersCount() {
-    const serversCount = this._getServersCount();
-    this.dispatchEvent(
-      new CustomEvent('api-servers-count-changed', {
-        detail: { serversCount },
-        bubbles: false,
-        composed: false,
-      }),
-    );
+    const { noCustom = false } = this
+    const customServer = noCustom ? 0 : 1
+    const serversCount = this._getServersCount() + customServer;
+    this.dispatchEvent(new CustomEvent('servers-count-changed', { detail: { serversCount } }));
   }
 
   _isValueValid(value) {
@@ -460,7 +452,7 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
   }
 
   /**
-   * Retrieves the total amount of servers being rendered
+   * Retrieves the total amount of servers being rendered, without counting customServer
    *
    * @return {Number} total amount of servers being rendered
    */
@@ -522,7 +514,7 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
    * @return {TemplateResult} Custom URI `anypoint-item`
    */
   _renderCustomURIOption() {
-    if (this.hideCustom) {
+    if (this.noCustom) {
       return '';
     }
     return html`<anypoint-item class="custom-option" value="custom">Custom URI</anypoint-item>`;
