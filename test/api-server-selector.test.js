@@ -8,8 +8,8 @@ describe('<api-server-selector>', () => {
     return (await fixture(`<api-server-selector></api-server-selector>`));
   }
 
-  async function hideCustomFixture() {
-    return (await fixture(`<api-server-selector hideCustom></api-server-selector>`));
+  async function noCustomFixture() {
+    return (await fixture(`<api-server-selector noCustom></api-server-selector>`));
   }
 
   async function extraOptionsFixture() {
@@ -19,6 +19,19 @@ describe('<api-server-selector>', () => {
                                         </anypoint-item>
                                         <anypoint-item slot="custom-base-uri" value="http://customServer2.com">
                                           http://customServer2.com
+                                        </anypoint-item>
+                                    </api-server-selector>`));
+  }
+  async function slotChangeFixture() {
+    return (await fixture(`<api-server-selector>
+                                        <anypoint-item slot="custom-base-uri" value="http://customServer.com">
+                                          http://customServer.com
+                                        </anypoint-item>
+                                        <anypoint-item slot="custom-base-uri" value="http://customServer2.com">
+                                          http://customServer2.com
+                                        </anypoint-item>
+                                        <anypoint-item value="http://customServer3.com">
+                                          http://customServer3.com
                                         </anypoint-item>
                                     </api-server-selector>`));
   }
@@ -95,17 +108,17 @@ describe('<api-server-selector>', () => {
       assert.exists(element.shadowRoot.querySelector('.custom-option'));
     });
 
-    it('should set baseUri and render as Custom even when `hideCustom` is enabled', async () => {
+    it('should set baseUri and render as Custom even when `noCustom` is enabled', async () => {
       element = await baseUriFixture();
       await nextFrame();
-      element.hideCustom = true;
+      element.noCustom = true;
       assert.equal(element.selectedValue, 'https://www.google.com');
       assert.equal(element.selectedType, 'custom');
       assert.equal(element.baseUri, 'https://www.google.com');
     })
 
-    it('should not render `Custom URI` when `hideCustom` is enabled', async () => {
-      element = await hideCustomFixture()
+    it('should not render `Custom URI` when `noCustom` is enabled', async () => {
+      element = await noCustomFixture()
       await nextFrame();
       assert.notExists(element.shadowRoot.querySelector('.custom-option'));
     });
@@ -115,8 +128,8 @@ describe('<api-server-selector>', () => {
         assert.isNotEmpty(element._renderCustomURIOption());
       });
 
-      it('should not return custom uri option when `hideCustom` is enabled', () => {
-        element.hideCustom = true;
+      it('should not return custom uri option when `noCustom` is enabled', () => {
+        element.noCustom = true;
         assert.isEmpty(element._renderCustomURIOption());
       });
     });
@@ -195,8 +208,8 @@ describe('<api-server-selector>', () => {
       assert.lengthOf(element.shadowRoot.querySelector('slot[name="custom-base-uri"]').assignedElements(), 2);
     });
 
-    it('should have customUri at last index', () => {
-      assert.equal(element._getCustomUriIndex(), 2)
+    it('should have a total of 2 servers', () => {
+      assert.equal(element._getServersCount(), 2)
     })
   });
 
@@ -455,5 +468,60 @@ describe('<api-server-selector>', () => {
         assert.equal(element._getIndexForValue(), 3);
       });
     });
+
+    describe('handleSlotChange', () => {
+      let element;
+
+      before(async () => {
+        element = await slotChangeFixture();
+        await nextFrame();
+      });
+
+      it('should render 2 servers', () => {
+        assert.equal(element._getServersCount(), 2);
+      })
+
+      it('should dispatch servers-count-changed event when slot is added', async () => {
+        const toBeSlotted = element.children[2];
+        let event;
+        const handler = (e) => {
+          event = e;
+        }
+        element.addEventListener('servers-count-changed', handler);
+        toBeSlotted.setAttribute('slot', 'custom-base-uri');
+        await nextFrame();
+        assert.deepEqual(event.detail, {
+          serversCount: 4
+        });
+      })
+
+      it('should render 3 servers after update', () => {
+        assert.equal(element._getServersCount(), 3);
+      })
+    })
+
+    describe('api servers count change event should be dispatched once rendered', () => {
+      let element;
+      let event;
+
+      before(async () => {
+        const handler = (e) => {
+          event = e;
+        }
+        element = document.createElement('api-server-selector')
+        element.addEventListener('servers-count-changed', handler)
+        document.body.appendChild(element)
+      });
+
+      it('should render 2 servers', () => {
+        assert.equal(element._getServersCount(), 0);
+      })
+
+      it('should have triggered event', () => {
+        assert.deepEqual(event.detail, {
+          serversCount: 1
+        });
+      })
+    })
   });
 });

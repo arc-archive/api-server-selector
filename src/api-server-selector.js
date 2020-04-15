@@ -49,7 +49,7 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
       /**
        * If activated, `Custom URI` will not be in the dropdown options
        */
-      hideCustom: { type: Boolean },
+      noCustom: { type: Boolean, reflect: true  },
       /**
        * Holds the current servers to show in in the dropdown menu
        */
@@ -66,14 +66,24 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
        * Always a URI value
        */
       selectedValue: { type: String },
+      /**
+       * Current selected server index
+       */
       _selectedIndex: { type: Number },
-      hidden: { type: Boolean },
+      /**
+       * If activated, server selector will not be visible
+       */
+      hidden: { type: Boolean, reflect: true },
     };
   }
 
   constructor() {
     super();
     this._handleNavigationChange = this._handleNavigationChange.bind(this);
+  }
+
+  firstUpdated() {
+    this._notifyServersCount()
   }
 
   get styles() {
@@ -104,6 +114,7 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
     this._servers = value;
     this._checkForSelectedChange(old);
     this.requestUpdate('servers', old);
+    this._notifyServersCount();
   }
 
   get servers() {
@@ -138,7 +149,7 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
       return;
     }
 
-    this._selectedIndex = this._getCustomUriIndex();
+    this._selectedIndex = this._getServersCount();
     this.selectedType = 'custom';
     this._selectedValue = value;
     this._baseUri = value;
@@ -220,6 +231,13 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
     node.removeEventListener('api-navigation-selection-changed', this._handleNavigationChange);
   }
 
+  _notifyServersCount() {
+    const { noCustom = false } = this
+    const customServer = noCustom ? 0 : 1
+    const serversCount = this._getServersCount() + customServer;
+    this.dispatchEvent(new CustomEvent('servers-count-changed', { detail: { serversCount } }));
+  }
+
   _isValueValid(value) {
     if (!this.selectedType && !value) {
       return true;
@@ -253,10 +271,7 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
   }
 
   _getIndexForSlotValue(value) {
-    let { servers } = this;
-    if (!servers) {
-      servers = [];
-    }
+    const { servers = [] } = this;
     const extraServers = this._getExtraServers();
     if (!extraServers) {
       return -1;
@@ -267,7 +282,7 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
 
   _getIndexForValue(value) {
     if (this.isCustom) {
-      return this._getCustomUriIndex();
+      return this._getServersCount();
     }
 
     if (this.selectedType === 'slot') {
@@ -405,7 +420,7 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
   }
 
   _isCustomIndex(index) {
-    return index === this._getCustomUriIndex();
+    return index === this._getServersCount();
   }
 
   /**
@@ -437,11 +452,11 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
   }
 
   /**
-   * Retrieves custom base uri option's index
+   * Retrieves the total amount of servers being rendered, without counting customServer
    *
-   * @return {Number} custom base uri option's index
+   * @return {Number} total amount of servers being rendered
    */
-  _getCustomUriIndex() {
+  _getServersCount() {
     const { servers = [] } = this
     const extraServers = this._getExtraServers();
     return servers.length + extraServers.length;
@@ -452,7 +467,7 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
       return undefined;
     }
     const { servers = [] } = this
-    const customUriIndex = this._getCustomUriIndex()
+    const customUriIndex = this._getServersCount()
     if (selectedIndex < servers.length) {
       return 'server';
     } else if (selectedIndex === customUriIndex) {
@@ -499,7 +514,7 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
    * @return {TemplateResult} Custom URI `anypoint-item`
    */
   _renderCustomURIOption() {
-    if (this.hideCustom) {
+    if (this.noCustom) {
       return '';
     }
     return html`<anypoint-item class="custom-option" value="custom">Custom URI</anypoint-item>`;
@@ -526,7 +541,7 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
    * @return {TemplateResult}
    */
   _renderExtraSlot() {
-    return html`<slot name="custom-base-uri"></slot>`;
+    return html`<slot @slotchange="${this._notifyServersCount}" name="custom-base-uri"></slot>`;
   }
 
   _renderUriInput() {
