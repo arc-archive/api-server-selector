@@ -1,6 +1,6 @@
 {
   "name": "@api-components/api-server-selector",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "description": "A component that renders OAS' servers as a dropdown option to select API server.",
   "license": "Apache-2.0",
   "main": "index.js",
