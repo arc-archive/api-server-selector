@@ -513,13 +513,38 @@ describe('<api-server-selector>', () => {
         document.body.appendChild(element)
       });
 
-      it('should render 2 servers', () => {
+      it('should render 0 servers', () => {
         assert.equal(element._getServersCount(), 0);
       })
 
       it('should have triggered event', () => {
         assert.deepEqual(event.detail, {
           serversCount: 1
+        });
+      })
+    })
+
+    describe('api servers count change event should be dispatched when noCustom changes', () => {
+      let element;
+      let event;
+
+      before(async () => {
+        element = await basicFixture();
+        const handler = (e) => {
+          event = e;
+        }
+        element.addEventListener('servers-count-changed', handler);
+        element.noCustom = true;
+        await nextFrame();
+      });
+
+      it('should render 0 servers', () => {
+        assert.equal(element._getServersCount(), 0);
+      })
+
+      it('should have triggered event', () => {
+        assert.deepEqual(event.detail, {
+          serversCount: 0
         });
       })
     })
