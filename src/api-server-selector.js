@@ -125,6 +125,21 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
     return this._selectedValue;
   }
 
+  get noCustom() {
+    return this._noCustom;
+  }
+
+  set noCustom(value) {
+    const old = this.noCustom;
+    if (old === value) {
+      return;
+    }
+
+    this._noCustom = value;
+    this._notifyServersCount();
+    this.requestUpdate('noCustom', old);
+  }
+
   set amf(model) {
     const old = this._amf;
     if (old === model) {
