@@ -99,6 +99,8 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
     
     .api-server-dropdown, .uri-input {
       width: 100%;
+      margin-left: 0px;
+      margin-right: 0px;
       max-width: 700px;
       min-width: 280px;
     }
