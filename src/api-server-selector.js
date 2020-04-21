@@ -16,11 +16,11 @@ import { close } from '@advanced-rest-client/arc-icons/ArcIcons.js';
  * When the selected server changes, it dispatches an `api-server-changed`
  * event, with the following details:
  * - Server value: the server id (for listed servers in the model), the URI
- *    value (when custom URI is selected), or the value of the `anypoint-item`
+ *    value (when custom base URI is selected), or the value of the `anypoint-item`
  *    component rendered into the extra slot
  * - Selected type: `server` | `custom` | `extra`
  *    - `server`: server from the AMF model
- *    - `custom`: custom URI input change
+ *    - `custom`: custom base URI input change
  *    - `extra`: extra slot's anypoint-item `value` attribute (see below)
  *
  * Adding extra slot:
@@ -47,9 +47,9 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
        */
       baseUri: { type: String },
       /**
-       * If activated, `Custom URI` will not be in the dropdown options
+       * If activated, `Custom base URI` will be in the dropdown options
        */
-      noCustom: { type: Boolean, reflect: true  },
+      allowCustom: { type: Boolean, reflect: true  },
       /**
        * Holds the current servers to show in in the dropdown menu
        */
@@ -90,10 +90,17 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
     return css`
     :host{
       display: block;
+      width: 100%;
     }
 
     :host([hidden]) {
       display: none;
+    }
+    
+    .api-server-dropdown, .uri-input {
+      width: 100%;
+      max-width: 700px;
+      min-width: 280px;
     }
 
     .icon {
@@ -125,19 +132,19 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
     return this._selectedValue;
   }
 
-  get noCustom() {
-    return this._noCustom;
+  get allowCustom() {
+    return this._allowCustom;
   }
 
-  set noCustom(value) {
-    const old = this.noCustom;
+  set allowCustom(value) {
+    const old = this.allowCustom;
     if (old === value) {
       return;
     }
 
-    this._noCustom = value;
+    this._allowCustom = value;
     this._notifyServersCount();
-    this.requestUpdate('noCustom', old);
+    this.requestUpdate('allowCustom', old);
   }
 
   set amf(model) {
@@ -247,8 +254,8 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
   }
 
   _notifyServersCount() {
-    const { noCustom = false } = this
-    const customServer = noCustom ? 0 : 1
+    const { allowCustom = false } = this
+    const customServer = allowCustom ? 1 : 0
     const serversCount = this._getServersCount() + customServer;
     this.dispatchEvent(new CustomEvent('servers-count-changed', { detail: { serversCount } }));
   }
@@ -529,10 +536,11 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
    * @return {TemplateResult} Custom URI `anypoint-item`
    */
   _renderCustomURIOption() {
-    if (this.noCustom) {
+    const { allowCustom } = this
+    if (!allowCustom) {
       return '';
     }
-    return html`<anypoint-item class="custom-option" value="custom">Custom URI</anypoint-item>`;
+    return html`<anypoint-item class="custom-option" value="custom">Custom base URI</anypoint-item>`;
   }
 
   _getServerUri(server) {

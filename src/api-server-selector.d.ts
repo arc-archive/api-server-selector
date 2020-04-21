@@ -20,151 +20,164 @@ import {EventsTargetMixin} from '@advanced-rest-client/events-target-mixin/event
 
 export {ApiServerSelector};
 
-declare namespace ApiElements {
+/**
+ * `api-server-selector`
+ * An element to generate view model for server
+ * elements from AMF model
+ *
+ * This component receives an AMF model, and listens
+ * to navigation events to know which node's servers
+ * it should render.
+ *
+ * When the selected server changes, it dispatches an `api-server-changed`
+ * event, with the following details:
+ * - Server value: the server id (for listed servers in the model), the URI
+ *    value (when custom base URI is selected), or the value of the `anypoint-item`
+ *    component rendered into the extra slot
+ * - Selected type: `server` | `custom` | `extra`
+ *    - `server`: server from the AMF model
+ *    - `custom`: custom base URI input change
+ *    - `extra`: extra slot's anypoint-item `value` attribute (see below)
+ *
+ * Adding extra slot:
+ * This component renders a `slot` element to render anything the users wants
+ * to add in there. To enable this, sit the `extraOptions` value in this component
+ * to true, and render an element associated to the slot name `custom-base-uri`.
+ * The items rendered in this slot should be `anypoint-item` components, and have a
+ * `value` attribute. This is the value that will be dispatched in the `api-server-changed`
+ * event.
+ */
+declare class ApiServerSelector extends
+  AmfHelperMixin(
+  EventTargetMixin(
+  LitElement)) {
+  amf: any;
+  readonly styles: any;
 
   /**
-   * `api-server-selector`
-   * An element to generate view model for server
-   * elements from AMF model
-   *
-   * This component receives an AMF model, and listens
-   * to navigation events to know which node's servers
-   * it should render.
-   *
-   * When the selected server changes, it dispatches an `api-server-changed`
-   * event, with the following details:
-   * - Server value: the server id (for listed servers in the model), the URI
-   *    value (when custom URI is selected), or the value of the `anypoint-item`
-   *    component rendered into the extra slot
-   * - Selected type: `server` | `custom` | `extra`
-   *    - `server`: server from the AMF model
-   *    - `custom`: custom URI input change
-   *    - `extra`: extra slot's anypoint-item `value` attribute (see below)
-   *
-   * Adding extra slot:
-   * This component renders a `slot` element to render anything the users wants
-   * to add in there. To enable this, sit the `extraOptions` value in this component
-   * to true, and render an element associated to the slot name `custom-base-uri`.
-   * The items rendered in this slot should be `anypoint-item` components, and have a
-   * `value` attribute. This is the value that will be dispatched in the `api-server-changed`
-   * event.
+   * Holds the current servers to show in in the dropdown menu
    */
-  class ApiServerSelector extends
-    AmfHelperMixin(
-    EventTargetMixin(
-    Object)) {
+  servers: any[]|null|undefined;
+  readonly selected: any;
 
-    /**
-     * AMF model to be rendered
-     */
-    amf: object|null|undefined;
-    readonly styles: any;
-    servers: any;
-    readonly selected: any;
+  /**
+   * If activated, `Custom base URI` will be in the dropdown options
+   */
+  allowCustom: boolean|null|undefined;
 
-    /**
-     * The baseUri to override any server definition
-     */
-    baseUri: string|null|undefined;
-    methodId: any;
-    endpointId: any;
-    uri: any;
-    selectedType: any;
+  /**
+   * The baseUri to override any server definition
+   */
+  baseUri: string|null|undefined;
 
-    /**
-     * If activated, `Custom URI` will not be in the dropdown options
-     */
-    hideCustom: boolean|null|undefined;
+  /**
+   * Current value of the server
+   * Always a URI value
+   */
+  selectedValue: string|null|undefined;
+  methodId: string|null|undefined;
+  endpointId: string|null|undefined;
+  readonly isCustom: Boolean|null;
 
-    /**
-     * Holds the current servers to show in in the dropdown menu
-     */
-    _servers: any[]|null|undefined;
-    _selectedIndex: number|null|undefined;
-    _selectedValue: string|null|undefined;
-    _selectedType: string|null|undefined;
-    _endpointId: string|null|undefined;
-    _methodId: string|null|undefined;
-    _uri: string|null|undefined;
-    handleNavigationChange(e: any): void;
-    _checkForSelectedChange(oldServers: any): void;
+  /**
+   * Currently selected type of an base URI.
+   * `server` | `slot` | `custom`
+   */
+  selectedType: string|null|undefined;
 
-    /**
-     * Search for a server in a list of search, comparing against AMF id
-     *
-     * @param serverId The desired server to search for
-     * @param servers The list of AMF server models to search in,
-     * @returns The index of the server, or -1 if not found
-     */
-    _getIndexOfServer(serverId: String|null, servers: any[]|null): Number|null;
-    _getServerValue(server: any): any;
+  /**
+   * Current selected server index
+   */
+  _selectedIndex: number|null|undefined;
 
-    /**
-     * Update component's servers
-     */
-    updateServers({
+  /**
+   * If activated, server selector will not be visible
+   */
+  hidden: boolean|null|undefined;
+  constructor();
+  firstUpdated(): void;
+  render(): any;
+  _attachListeners(node: any): void;
+  _detachListeners(node: any): void;
+  _notifyServersCount(): void;
+  _isValueValid(value: any): any;
+  _findServerByValue(value: any): any;
+  _findServerById(id: any): any;
+  _getIndexForSlotValue(value: any): any;
+  _getIndexForValue(value: any): any;
+  _handleNavigationChange(e: any): void;
+  _checkForSelectedChange(oldServers: any): void;
+  _getIndexOfServerByUri(value: any, servers: any): any;
+
+  /**
+   * Search for a server in a list of search, comparing against AMF id
+   *
+   * @param serverId The desired server to search for
+   * @param servers The list of AMF server models to search in,
+   * @returns The index of the server, or -1 if not found
+   */
+  _getIndexOfServer(serverId: String|null, servers: any[]|null): Number|null;
+  _getServerValue(server: any): any;
+
+  /**
+   * Update component's servers
+   */
+  updateServers({
   id,
   type,
   endpointId
-}: any): void;
+} = {}: any): void;
 
-    /**
-     * Handler for the listbox's change event
-     */
-    handleSelectionChanged(e: CustomEvent|null): void;
-    _changeSelected({
+  /**
+   * Handler for the listbox's change event
+   */
+  _handleSelectionChanged(e: CustomEvent|null): void;
+  _isServerIndex(index: any): any;
+  _isCustomIndex(index: any): any;
+  _changeSelected({
   selectedIndex,
   selectedValue
-}: any): void;
-    _setUri({
-  selectedIndex,
-  selectedValue,
-  selectedType
-}: any): void;
+} = {}: any): void;
 
-    /**
-     * Retrieves custom base uris nodes assigned to the
-     * custom-base-uri slot
-     *
-     * @returns Nodes assigned to custom-base-uri slot
-     */
-    _getExtraServers(): any[]|null;
+  /**
+   * Retrieves custom base uris elements assigned to the
+   * custom-base-uri slot
+   *
+   * @returns Elements assigned to custom-base-uri slot
+   */
+  _getExtraServers(): any[]|null;
 
-    /**
-     * Retrieves custom base uri option's index
-     *
-     * @returns custom base uri option's index
-     */
-    _getCustomUriIndex(): Number|null;
-    _getSelectedType(selectedIndex: any): any;
+  /**
+   * Retrieves the total amount of servers being rendered, without counting customServer
+   *
+   * @returns total amount of servers being rendered
+   */
+  _getServersCount(): Number|null;
+  _getSelectedType(selectedIndex: any): any;
+  _handleUriChange(event: any): void;
+  _resetSelection(): void;
 
-    /**
-     * Call the render functions for
-     * - Server options (from AMF Model)
-     * - Custom URI option
-     * - Extra slot
-     *
-     * @returns The combination of all options
-     */
-    renderItems(): TemplateResult|null;
-    _getServerUri(server: any): any;
-    renderServerOptions(): any;
+  /**
+   * Call the render functions for
+   * - Server options (from AMF Model)
+   * - Custom URI option
+   * - Extra slot
+   *
+   * @returns The combination of all options
+   */
+  _renderItems(): TemplateResult|null;
 
-    /**
-     * @returns Custom URI `anypoint-item`
-     */
-    renderCustomURIOption(): TemplateResult|null;
+  /**
+   * @returns Custom URI `anypoint-item`
+   */
+  _renderCustomURIOption(): TemplateResult|null;
+  _getServerUri(server: any): any;
+  _renderServerOptions(): any;
 
-    /**
-     * Returns template result with `slot` element
-     */
-    renderExtraSlot(): TemplateResult|null;
-    _handleUriChange(event: any): void;
-    _resetSelection(): void;
-    _renderUriInput(): any;
-    _renderDropdown(): any;
-    render(): any;
-    _attachListeners(node: any): void;
-    _detachListeners(node: any): void;
-  }
+  /**
+   * Returns template result with `slot` element
+   */
+  _renderExtraSlot(): TemplateResult|null;
+  _renderUriInput(): any;
+  _renderDropdown(): any;
 }

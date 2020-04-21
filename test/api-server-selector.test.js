@@ -8,8 +8,8 @@ describe('<api-server-selector>', () => {
     return (await fixture(`<api-server-selector></api-server-selector>`));
   }
 
-  async function noCustomFixture() {
-    return (await fixture(`<api-server-selector noCustom></api-server-selector>`));
+  async function allowCustomFixture() {
+    return (await fixture(`<api-server-selector allowCustom></api-server-selector>`));
   }
 
   async function extraOptionsFixture() {
@@ -37,7 +37,7 @@ describe('<api-server-selector>', () => {
   }
 
   async function baseUriFixture() {
-    return (await fixture(`<api-server-selector baseUri="https://www.google.com"></api-server-selector>`));
+    return (await fixture(`<api-server-selector allowCustom baseUri="https://www.google.com"></api-server-selector>`));
   }
 
   function simulateSelection(element, index, value) {
@@ -81,61 +81,38 @@ describe('<api-server-selector>', () => {
       assert.lengthOf(element.shadowRoot.querySelector('slot[name="custom-base-uri"]').assignedElements(), 0)
     });
 
-    it('should select custom uri', () => {
-      const target = { selectedItem: { getAttribute: () => 'custom' } };
-      const detail = {
-        value: 0,
-      };
-      element._handleSelectionChanged({ detail, target });
-      assert.equal(element._selectedIndex, 0);
-      assert.equal(element.selectedValue, '');
-      assert.equal(element.selectedType, 'custom');
+    it('should not render `Custom URI` option by default', () => {
+      assert.notExists(element.shadowRoot.querySelector('.custom-option'));
     });
 
-    it('should unrender uri input when clicking close', () => {
-      const target = { selectedItem: { getAttribute: () => 'custom' } };
-      const detail = {
-        value: 0,
-      };
-      element._handleSelectionChanged({ detail, target });
-      element._resetSelection();
-      assert.equal(element._selectedIndex, undefined);
-      assert.equal(element._selectedValue, undefined);
-      assert.notExists(element.shadowRoot.querySelector('.uri-input'));
-    });
-
-    it('should render `Custom URI` option by default', () => {
-      assert.exists(element.shadowRoot.querySelector('.custom-option'));
-    });
-
-    it('should set baseUri and render as Custom even when `noCustom` is enabled', async () => {
+    it('should set baseUri and render as Custom even when `allowCustom` is disabled', async () => {
       element = await baseUriFixture();
       await nextFrame();
-      element.noCustom = true;
+      element.allowCustom = false;
       assert.equal(element.selectedValue, 'https://www.google.com');
       assert.equal(element.selectedType, 'custom');
       assert.equal(element.baseUri, 'https://www.google.com');
     })
 
-    it('should not render `Custom URI` when `noCustom` is enabled', async () => {
-      element = await noCustomFixture()
+    it('should render `Custom URI` when `allowCustom` is enabled', async () => {
+      element = await allowCustomFixture()
       await nextFrame();
-      assert.notExists(element.shadowRoot.querySelector('.custom-option'));
+      assert.exists(element.shadowRoot.querySelector('.custom-option'));
     });
 
     describe('renderCustomURIOption()', () => {
-      it('should return custom uri option', () => {
-        assert.isNotEmpty(element._renderCustomURIOption());
+      it('should not return custom uri option', () => {
+        assert.isEmpty(element._renderCustomURIOption());
       });
 
-      it('should not return custom uri option when `noCustom` is enabled', () => {
-        element.noCustom = true;
-        assert.isEmpty(element._renderCustomURIOption());
+      it('should return custom uri option when `allowCustom` is enabled', () => {
+        element.allowCustom = true;
+        assert.isNotEmpty(element._renderCustomURIOption());
       });
     });
 
     it('should dispatch `api-server-changed` event', async () => {
-      element = await basicFixture();
+      element = await allowCustomFixture();
       let event;
       const handler = (e) => {
         event = e;
@@ -159,12 +136,42 @@ describe('<api-server-selector>', () => {
     });
 
     it('should update selectedValue if selectedType is `custom`', async () => {
-      element = await basicFixture();
+      element = await allowCustomFixture();
       element.selectedType = 'custom';
       element.selectedValue = 'https://example.com';
       assert.equal(element.selectedType, 'custom');
       assert.equal(element.selectedValue, 'https://example.com');
     });
+
+    describe('allowCustom option', () => {
+      beforeEach(async () => {
+        element = await allowCustomFixture();
+        await nextFrame();
+      });
+
+      it('should select custom uri', () => {
+        const target = { selectedItem: { getAttribute: () => 'custom' } };
+        const detail = {
+          value: 0,
+        };
+        element._handleSelectionChanged({ detail, target });
+        assert.equal(element._selectedIndex, 0);
+        assert.equal(element.selectedValue, '');
+        assert.equal(element.selectedType, 'custom');
+      });
+
+      it('should unrender uri input when clicking close', () => {
+        const target = { selectedItem: { getAttribute: () => 'custom' } };
+        const detail = {
+          value: 0,
+        };
+        element._handleSelectionChanged({ detail, target });
+        element._resetSelection();
+        assert.equal(element._selectedIndex, undefined);
+        assert.equal(element._selectedValue, undefined);
+        assert.notExists(element.shadowRoot.querySelector('.uri-input'));
+      });
+    })
   });
 
   describe('With fixed baseUri', () => {
@@ -491,7 +498,7 @@ describe('<api-server-selector>', () => {
         toBeSlotted.setAttribute('slot', 'custom-base-uri');
         await nextFrame();
         assert.deepEqual(event.detail, {
-          serversCount: 4
+          serversCount: 3
         });
       })
 
@@ -519,12 +526,12 @@ describe('<api-server-selector>', () => {
 
       it('should have triggered event', () => {
         assert.deepEqual(event.detail, {
-          serversCount: 1
+          serversCount: 0
         });
       })
     })
 
-    describe('api servers count change event should be dispatched when noCustom changes', () => {
+    describe('api servers count change event should be dispatched when allowCustom changes', () => {
       let element;
       let event;
 
@@ -534,7 +541,7 @@ describe('<api-server-selector>', () => {
           event = e;
         }
         element.addEventListener('servers-count-changed', handler);
-        element.noCustom = true;
+        element.allowCustom = true;
         await nextFrame();
       });
 
@@ -544,7 +551,7 @@ describe('<api-server-selector>', () => {
 
       it('should have triggered event', () => {
         assert.deepEqual(event.detail, {
-          serversCount: 0
+          serversCount: 1
         });
       })
     })

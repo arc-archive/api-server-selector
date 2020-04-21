@@ -1,4 +1,4 @@
-import { html } from 'lit-element';
+import { html, css } from 'lit-element';
 import { ApiDemoPage } from '@advanced-rest-client/arc-demo-helper';
 import '@advanced-rest-client/arc-demo-helper/arc-interactive-demo.js';
 import '@anypoint-web-components/anypoint-checkbox/anypoint-checkbox.js';
@@ -14,13 +14,23 @@ class DemoPage extends ApiDemoPage {
       'renderCustom',
       'servers',
       'selectedServer',
+      'allowCustom',
     ]);
     this.componentName = 'api-server-selector';
     this.renderViewControls = true;
     this.darkThemeActive = false;
     this.demoStates = ['Filled', 'Outlined', 'Anypoint'];
     this.renderCustom = false;
+    this.allowCustom = false;
     this._apiSrvHandler = this._apiSrvHandler.bind(this);
+  }
+
+  get styles() {
+    return css`
+      .selector-container {
+        width: 80%;
+      }
+    `
   }
 
   _demoStateHandler(e) {
@@ -72,9 +82,11 @@ class DemoPage extends ApiDemoPage {
       outlined,
       demoState,
       servers,
+      allowCustom,
       selectedServer,
+      styles
     } = this;
-    return html`
+    return html`<style>${styles}</style>
       <section class="documentation-section">
         <h3>Interactive demo</h3>
         <p>
@@ -88,18 +100,18 @@ class DemoPage extends ApiDemoPage {
           @state-chanegd="${this._demoStateHandler}"
           ?dark="${darkThemeActive}"
         >
-
+        <div class="selector-container" slot="content">
           <api-server-selector
-            .amf="${amf}"
-            ?compatibility="${compatibility}"
-            ?outlined="${outlined}"
-            .servers="${servers}"
-            slot="content"
-            @api-server-changed="${this._apiSrvHandler}"
-          >
-          ${this._extraSlotItems()}
-          </api-server-selector>
-
+              .amf="${amf}"
+              ?compatibility="${compatibility}"
+              ?allowCustom="${allowCustom}"
+              ?outlined="${outlined}"
+              .servers="${servers}"
+              @api-server-changed="${this._apiSrvHandler}"
+            >
+            ${this._extraSlotItems()}
+            </api-server-selector>
+        </div>
           <label slot="options" id="mainOptionsLabel">Options</label>
           <anypoint-checkbox
             aria-describedby="mainOptionsLabel"
@@ -107,6 +119,13 @@ class DemoPage extends ApiDemoPage {
             name="renderCustom"
             @change="${this._toggleMainOption}"
             >Add custom srv</anypoint-checkbox
+          >
+          <anypoint-checkbox
+            aria-describedby="mainOptionsLabel"
+            slot="options"
+            name="allowCustom"
+            @change="${this._toggleMainOption}"
+            >Allow Custom</anypoint-checkbox
           >
         </arc-interactive-demo>
 
