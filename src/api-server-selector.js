@@ -1,12 +1,24 @@
-import { html, LitElement, css } from 'lit-element';
+import { html, LitElement } from 'lit-element';
 import { AmfHelperMixin } from '@api-components/amf-helper-mixin/amf-helper-mixin.js';
 import { EventsTargetMixin } from '@advanced-rest-client/events-target-mixin/events-target-mixin.js';
 import '@anypoint-web-components/anypoint-input/anypoint-input.js';
+import '@anypoint-web-components/anypoint-dropdown-menu/anypoint-dropdown-menu.js';
+import '@anypoint-web-components/anypoint-listbox/anypoint-listbox.js';
+import '@anypoint-web-components/anypoint-item/anypoint-item.js';
+import '@anypoint-web-components/anypoint-button/anypoint-icon-button.js';
 import { close } from '@advanced-rest-client/arc-icons/ArcIcons.js';
+import styles from './styles.js';
 
 /** @typedef {import('lit-html').TemplateResult} TemplateResult */
 
+/**
+ * @typedef {Object} SelectionInfo
+ * @property {String} type Type of detected selection
+ * @property {String} value Normalized value to be used as editor value
+ */
+
 const apiChangeEventType = 'api-server-changed';
+const serverCountEventType = 'servers-count-changed';
 
 /**
  * `api-server-selector`
@@ -50,40 +62,28 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
        * The baseUri to override any server definition
        */
       baseUri: { type: String },
+
       /**
        * If activated, `Custom base URI` will be in the dropdown options
        */
       allowCustom: { type: Boolean, reflect: true  },
+
       /**
        * Holds the current servers to show in in the dropdown menu
        */
       servers: { type: Array },
-      /**
-       * The currently selected endpoint in the AMF model.
-       */
-      endpointId: { type: String },
-      /**
-       * The currently selected operation in the AMF model.
-       */
-      methodId: { type: String },
+
       /**
        * Currently selected type of an base URI.
        * `server` | `slot` | `custom`
        */
       selectedType: { type: String },
+
       /**
        * Current value of the server
        * Always a URI value
        */
       selectedValue: { type: String },
-      /**
-       * Current selected server index
-       */
-      _selectedIndex: { type: Number },
-      /**
-       * If activated, server selector will not be visible
-       */
-      hidden: { type: Boolean, reflect: true },
 
       /**
        * Enables outlined material theme
@@ -94,44 +94,35 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
        * Enables compatibility with the anypoint platform
        */
       compatibility: { type: Boolean },
+
+      /**
+       * Holds the size of rendered custom servers.
+       */
+      _customNodesCount: { type: Number },
+
+      /**
+       * When set it automaticallt selected the first server from the list
+       * of servers when selection is missing.
+       */
+      autoSelect: { type: Boolean },
     };
   }
 
-  constructor() {
-    super();
-    this._handleNavigationChange = this._handleNavigationChange.bind(this);
-  }
-
-  firstUpdated() {
-    this._notifyServersCount();
-  }
-
   get styles() {
-    return css`
-    :host{
-      display: block;
-      width: 100%;
-    }
-
-    :host([hidden]) {
-      display: none;
-    }
-
-    .api-server-dropdown, .uri-input {
-      width: calc(100% - 16px);
-      max-width: 700px;
-      min-width: 280px;
-    }
-
-    .icon {
-      display: inline-block;
-      width: 24px;
-      height: 24px;
-      fill: currentColor;
-    }
-    `;
+    return styles;
   }
 
+  /**
+   * @return {Array<Element>} List of rendered items in the drop down.
+   */
+  get _listItems() {
+    const node = /** @type {any} */ (this.shadowRoot.querySelector('anypoint-listbox'));
+    return node ? node.items : [];
+  }
+
+  /**
+   * @param {Array<Object>} value List of servers to set
+   */
   set servers(value) {
     const old = this._servers;
     if (old === value) {
@@ -139,7 +130,7 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
     }
 
     this._servers = value;
-    this._checkForSelectedChange(old);
+    this._updateServerSelection(value);
     this.requestUpdate('servers', old);
     this._notifyServersCount();
   }
@@ -176,10 +167,8 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
     if (old === value) {
       return;
     }
-
-    this._selectedIndex = this._getServersCount();
     this.selectedType = 'custom';
-    this._selectedValue = value;
+    this.selectedValue = value;
     this._baseUri = value;
     this.requestUpdate('baseUri', old);
   }
@@ -188,6 +177,14 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
     return this.baseUri || this._selectedValue;
   }
 
+  /**
+   * Sets currenlty rendered value.
+   * If the value is not one of the drop down options then it renders custom control.
+   *
+   * This can be used to programatically set a value of the control.
+   *
+   * @param {String} value The value to render.
+   */
   set selectedValue(value) {
     if (this.baseUri) {
       return;
@@ -196,25 +193,22 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
     if (old === value) {
       return;
     }
-
-    if (this._isValueValid(value)) {
-      const selectedIndex = this._getIndexForValue(value);
-      const selectedValue = value;
-      const selectedType = this.selectedType;
-      this._selectedIndex = selectedIndex;
-      this._selectedValue = selectedValue;
-      this.requestUpdate('selectedValue', old);
-      this.dispatchEvent(
-        new CustomEvent(apiChangeEventType, {
-          detail: {
-            selectedValue,
-            selectedType,
-          },
-          bubbles: true,
-          composed: true,
-        }),
-      );
+    const { type, value: effectiveValue } = this._selectionInfo(value);
+    if (this.selectedType !== type) {
+      this.selectedType = type;
     }
+    this._selectedValue = effectiveValue;
+    this.requestUpdate('selectedValue', old);
+    this.dispatchEvent(
+      new CustomEvent(apiChangeEventType, {
+        detail: {
+          selectedValue: effectiveValue,
+          selectedType: this.selectedType,
+        },
+        bubbles: true,
+        composed: true,
+      }),
+    );
   }
 
   /**
@@ -224,6 +218,10 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
     return this.selectedType === 'custom';
   }
 
+  /**
+   * @return {EventListenerObject|null} Previously registed callback function for
+   * the `api-server-changed` event.
+   */
   get onapiserverchange() {
     return this._onapiserverchange;
   }
@@ -246,6 +244,52 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
     }
   }
 
+  /**
+   * @return {EventListenerObject|null} Previously registed callback function for
+   * the `servers-count-changed` event.
+   */
+  get onserverscountchange() {
+    return this._onserverscountchange || null;
+  }
+
+  /**
+   * @param {EventListenerObject} value A callback function to be called
+   * when `servers-count-changed` event is dispatched.
+   */
+  set onserverscountchange(value) {
+    const old = this._onserverscountchange;
+    if (old) {
+      this.removeEventListener(serverCountEventType, old);
+    }
+    const isFn = typeof value === 'function';
+    if (isFn) {
+      this._onserverscountchange = value;
+      this.addEventListener(serverCountEventType, value);
+    } else {
+      this._onserverscountchange = null;
+    }
+  }
+
+  /**
+   * @return {Number} Total number of list items being rendered.
+   */
+  get _serversCount() {
+    const { allowCustom, servers, _customNodesCount=0 } = this;
+    const offset = allowCustom ? 1 : 0;
+    const serversCount = servers.length + _customNodesCount + offset;
+    return serversCount;
+  }
+
+  constructor() {
+    super();
+    this._handleNavigationChange = this._handleNavigationChange.bind(this);
+    this._customNodesCount = 0;
+  }
+
+  firstUpdated() {
+    this._notifyServersCount();
+  }
+
   _attachListeners(node) {
     super._attachListeners(node);
     node.addEventListener('api-navigation-selection-changed', this._handleNavigationChange);
@@ -256,76 +300,93 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
     node.removeEventListener('api-navigation-selection-changed', this._handleNavigationChange);
   }
 
+  /**
+   * Dispatches the `servers-count-changed` event with the current number of rendered servers.
+   */
   _notifyServersCount() {
-    const { allowCustom = false } = this;
-    const customServer = allowCustom ? 1 : 0;
-    const serversCount = this._getServersCount() + customServer;
-    this.dispatchEvent(new CustomEvent('servers-count-changed', { detail: { serversCount } }));
+    const { _serversCount: serversCount } = this;
+    this.dispatchEvent(new CustomEvent(serverCountEventType, { detail: { serversCount } }));
   }
 
+  /**
+   * A handler called when slotted number of children change.
+   * It sets `_customNodesCount` proeprty with the number of properties
+   * and notifies the change.
+   */
+  _childrenHandler() {
+    const nodes = this._getExtraServers();
+    this._customNodesCount = nodes.length;
+    this._notifyServersCount();
+  }
+
+  /**
+   * @override callback function when AMF change.
+   * This is asynchronous operation.
+   */
   __amfChanged() {
     this.updateServers();
+    this.selectIfNeeded();
   }
 
-  _isValueValid(value) {
-    if (!this.selectedType && !value) {
-      return true;
+  /**
+   * Executes auto selection logic.
+   * It selectes a fist available sever from the serves list when AMF or operation
+   * selection changed.
+   * When there's already valid selection then it does nothing.
+   */
+  selectIfNeeded() {
+    const { selectedValue, isCustom, autoSelect } = this;
+    if (isCustom || !autoSelect) {
+      return;
     }
-    switch (this.selectedType) {
-      case 'server':
-        return Boolean(this._findServerByValue(value));
-      case 'slot':
-        return this._getIndexForSlotValue(value) > -1;
-      case 'custom':
-        return true;
-      default:
-        return !value;
+    if (!selectedValue) {
+      const srv = this.servers[0];
+      if (!srv) {
+        return;
+      }
+      this.selectedValue = this._getServerUri(srv);
     }
   }
 
-  _findServerByValue(value) {
-    const { servers } = this;
-    if (!servers) {
-      return undefined;
+  /**
+   * Collects information about selection from the current value.
+   * @param {String} value Current value for the server URI.
+   * @return {SelectionInfo} A selection info object
+   */
+  _selectionInfo(value) {
+    const { isCustom } = this;
+    const result = {
+      type: 'server',
+      value
+    };
+    if (isCustom) {
+      result.type = 'custom';
+      return result;
     }
-    return servers.find(server => this._getServerUri(server) === value);
+    const items = this._listItems;
+    const node = items.find((node) => node.getAttribute('value') === value);
+    if (!node) {
+      return result;
+    }
+    if (value === 'custom') {
+      result.value = '';
+      result.type = 'custom';
+      return result;
+    }
+    const slot = node.getAttribute('slot');
+    const isSlotted = slot === 'custom-base-uri';
+    if (isSlotted) {
+      result.type = 'slot';
+    } else {
+      result.type = 'server';
+    }
+    return result;
   }
 
-  _findServerById(id) {
-    const { servers } = this;
-    if (!servers) {
-      return undefined;
-    }
-    return servers.find(server => this._getServerValue(server) === id);
-  }
-
-  _getIndexForSlotValue(value) {
-    const { servers = [] } = this;
-    const extraServers = this._getExtraServers();
-    if (!extraServers) {
-      return -1;
-    }
-    const server = extraServers.find(elem => elem.getAttribute('value') === value);
-    return extraServers.indexOf(server) + servers.length;
-  }
-
-  _getIndexForValue(value) {
-    if (this.isCustom) {
-      return this._getServersCount();
-    }
-
-    if (this.selectedType === 'slot') {
-      return this._getIndexForSlotValue(value);
-    }
-
-    if (this.selectedType === 'server') {
-      const server = this._findServerByValue(value);
-      return this._getIndexOfServer(this._getServerValue(server), this.servers);
-    }
-
-    return undefined;
-  }
-
+  /**
+   * Handler for the `api-navigation-selection-changed` event.
+   * @param {CustomEvent} e
+   */
   _handleNavigationChange(e) {
     const { selected, type, endpointId } = e.detail;
     const serverDefinitionAllowedTypes = ['endpoint', 'method'];
@@ -333,37 +394,33 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
       return;
     }
     this.updateServers({ id: selected, type, endpointId });
+    this.selectIfNeeded();
   }
 
-  _checkForSelectedChange(oldServers) {
-    if (this._selectedIndex === undefined || this._selectedIndex === null) {
+  /**
+   * Takes care of recognizing whether a server selection should be cleared.
+   * This happes when list of servers change and with the new list of server
+   * current selection does not exist.
+   * This ignores the selection when current type is not a `server`.
+   *
+   * @param {Array<Object>} servers List of new servers
+   */
+  _updateServerSelection(servers) {
+    if (!servers || this.selectedType !== 'server') {
       return;
     }
-    if (!oldServers) {
-      oldServers = [];
+    const index = this._getServerIndexByUri(servers, this.selectedValue);
+    if (index === -1) {
+      this._resetSelection();
     }
-    let newIndex;
-    let newValue = this._selectedValue;
-    const isModelServerSelected = this._selectedIndex < oldServers.length;
-    if (!this.servers) {
-      newIndex = undefined;
-      newValue = undefined;
-    } else if (isModelServerSelected) {
-      const indexInNewServers = this._getIndexOfServerByUri(this._selectedValue, this.servers);
-      if (indexInNewServers > -1) {
-        newIndex = indexInNewServers;
-      } else {
-        newIndex = undefined;
-        newValue = undefined;
-      }
-    } else {
-      const serverOffset = this.servers.length - oldServers.length;
-      newIndex = this._selectedIndex + serverOffset;
-    }
-    this._changeSelected({ selectedIndex: newIndex, selectedValue: newValue });
   }
 
-  _getIndexOfServerByUri(value, servers) {
+  /**
+   * @param {Array<Object>} servers List of current servers
+   * @param {String} value The value to look for
+   * @return {Number} The index of found server or -1 if none found.
+   */
+  _getServerIndexByUri(servers, value) {
     for (let i = 0; i < servers.length; i++) {
       const server = servers[i];
       if (this._getServerUri(server) === value) {
@@ -374,31 +431,7 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
   }
 
   /**
-   * Search for a server in a list of search, comparing against AMF id
-   *
-   * @param {String} serverId The desired server to search for
-   * @param {Array} servers The list of AMF server models to search in,
-   * @return {Number} The index of the server, or -1 if not found
-   */
-  _getIndexOfServer(serverId, servers) {
-    for (let i = 0; i < servers.length; i++) {
-      const server = servers[i];
-      if (this._getValue(server, '@id') === serverId) {
-        return i;
-      }
-    }
-    return -1;
-  }
-
-  _getServerValue(server) {
-    if (server) {
-      return this._getValue(server, '@id');
-    }
-    return '';
-  }
-
-  /**
-   * Update component's servers
+   * Update component's servers.
    *
    * @param {?Object} selectedNodeParams The currently selected node parameters to set the servers for
    * @param {String} selectedNodeParams.id The selected node ID where servers should be fetched
@@ -413,8 +446,6 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
     if (type === 'endpoint') {
       endpointId = id;
     }
-    this.methodId = methodId;
-    this.endpointId = endpointId;
     this.servers = this._getServers({ endpointId, methodId });
   }
 
@@ -424,48 +455,10 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
    */
   _handleSelectionChanged(e) {
     const { selectedItem } = /** @type {any} */ (e.target);
-    const selectedIndex = e.detail.value;
     if (!selectedItem) {
       return;
     }
-    let selectedValue = selectedItem.getAttribute('value');
-    if (this._isServerIndex(selectedIndex)) {
-      selectedValue = this._getServerUri(this._findServerById(selectedValue));
-    } else if (this._isCustomIndex(selectedIndex) && !this.isCustom) {
-      selectedValue = '';
-    }
-    if (selectedValue === this.selectedValue) {
-      return;
-    }
-    this._changeSelected({ selectedIndex, selectedValue });
-  }
-
-  _isServerIndex(index) {
-    const { servers } = this;
-    if (!servers) {
-      return false;
-    }
-    return index < servers.length;
-  }
-
-  _isCustomIndex(index) {
-    return index === this._getServersCount();
-  }
-
-  /**
-   *
-   * @param {?Object} params Composed object
-   * @param {?Number} params.selectedIndex The index of the selected item in the listbox
-   * @param {?String} params.selectedValue The URI value of the selected item in the listbox
-   */
-  _changeSelected({ selectedIndex, selectedValue } = {}) {
-    const oldValue = this.selectedValue;
-    if (selectedIndex === this._selectedIndex && selectedValue === oldValue) {
-      return;
-    }
-    const selectedType = this._getSelectedType(selectedIndex);
-    this.selectedType = selectedType;
-    this._selectedIndex = selectedIndex;
+    const selectedValue = selectedItem.getAttribute('value');
     this.selectedValue = selectedValue;
   }
 
@@ -473,54 +466,100 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
    * Retrieves custom base uris elements assigned to the
    * custom-base-uri slot
    *
-   * @return {Array} Elements assigned to custom-base-uri slot
+   * @return {Array<Element>} Elements assigned to custom-base-uri slot
    */
   _getExtraServers() {
-    const slot = this.shadowRoot.querySelector('slot[name="custom-base-uri"]');
-    return slot ? ( /** @type HTMLSlotElement */ (slot)).assignedElements({ flatten: true }) : [];
+    const slot = this.shadowRoot.querySelector('slot');
+    const items = slot ? ( /** @type HTMLSlotElement */ (slot)).assignedElements({ flatten: true }) : [];
+    return items.filter((elm) => elm.hasAttribute('value'));
   }
 
   /**
-   * Retrieves the total amount of servers being rendered, without counting customServer
-   *
-   * @return {Number} total amount of servers being rendered
+   * Handler for the input field change.
+   * @param {Event} e
    */
-  _getServersCount() {
-    const { servers = [] } = this;
-    const extraServers = this._getExtraServers();
-    return servers.length + extraServers.length;
-  }
-
-  _getSelectedType(selectedIndex) {
-    if (selectedIndex === null || selectedIndex === undefined) {
-      return undefined;
-    }
-    const { servers = [] } = this;
-    const customUriIndex = this._getServersCount();
-    if (selectedIndex < servers.length) {
-      return 'server';
-    } else if (selectedIndex === customUriIndex) {
-      return 'custom';
-    } else {
-      return 'slot';
-    }
-  }
-
-  _handleUriChange(event) {
-    const { value } = event.target;
+  _handleUriChange(e) {
+    const { value } = /** @type HTMLInputElement */ (e.target);
     this.selectedValue = value;
   }
 
+  /**
+   * Resets current selection to a default value.
+   */
   _resetSelection() {
-    this._changeSelected();
+    this.selectedValue = '';
+    this.selectedType = 'server';
+    this.selectIfNeeded();
+  }
+
+  /**
+   * Computes the URI of a server.
+   * @param {Object} server Server definition to get the value from.
+   * @return {String} Server base URI.
+   */
+  _getServerUri(server) {
+    const key = this._getAmfKey(this.ns.aml.vocabularies.core.urlTemplate);
+    return this._getValue(server, key);
   }
 
   render() {
     const { styles, isCustom } = this;
     return html`
     <style>${styles}</style>
-    ${isCustom ? this._renderUriInput() : this._renderDropdown()}
+    ${isCustom ? this._uriInputTemplate() : this._renderDropdown()}
     `;
+  }
+
+  /**
+   * @return {TemplateResult} Template result for the custom input.
+   */
+  _uriInputTemplate() {
+    const { compatibility, outlined, selectedValue } = this;
+    return html`
+    <anypoint-input
+      class="uri-input"
+      @input=${this._handleUriChange}
+      value="${selectedValue}"
+      ?compatibility="${compatibility}"
+      ?outlined="${outlined}"
+    >
+      <label slot="label">Base URI</label>
+      <anypoint-icon-button
+        aria-label="Activate to clear and close custom editor"
+        title="Clear and close custom editor"
+        slot="suffix"
+        @click="${this._resetSelection}"
+        ?compatibility="${compatibility}"
+      >
+        <span class="icon">${close}</span>
+      </anypoint-icon-button>
+  </anypoint-input>`;
+  }
+
+  /**
+   * @return {TemplateResult} Template result for the drop down element.
+   */
+  _renderDropdown() {
+    const { compatibility, outlined, selectedValue } = this;
+    return html`
+    <anypoint-dropdown-menu
+      class="api-server-dropdown"
+      ?compatibility="${compatibility}"
+      ?outlined="${outlined}"
+    >
+      <label slot="label">Select server</label>
+      <anypoint-listbox
+        .selected="${selectedValue}"
+        @selected-changed="${this._handleSelectionChanged}"
+        slot="dropdown-content"
+        tabindex="-1"
+        ?compatibility="${compatibility}"
+        ?outlined="${outlined}"
+        attrforselected="value"
+      >
+        ${this._renderItems()}
+      </anypoint-listbox>
+    </anypoint-dropdown-menu>`;
   }
 
   /**
@@ -553,17 +592,15 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
     >Custom base URI</anypoint-item>`;
   }
 
-  _getServerUri(server) {
-    const key = this._getAmfKey(this.ns.aml.vocabularies.core.urlTemplate);
-    return this._getValue(server, key);
-  }
-
+  /**
+   * @return {TemplateResult} Template result for the drop down list
+   * options for current servers
+   */
   _renderServerOptions() {
     const { servers, compatibility } = this;
-
     const toAnypointItem = (server) => {
       return html`<anypoint-item
-        value="${this._getServerValue(server)}"
+        value="${this._getServerUri(server)}"
         ?compatibility="${compatibility}"
       >
         ${this._getServerUri(server)}
@@ -573,55 +610,12 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
   }
 
   /**
-   * Returns template result with `slot` element
-   * @return {TemplateResult}
+   * @return {TemplateResult} Template result for the `slot` element
    */
   _renderExtraSlot() {
-    return html`<slot @slotchange="${this._notifyServersCount}" name="custom-base-uri"></slot>`;
-  }
-
-  _renderUriInput() {
-    const { compatibility, outlined, selectedValue } = this;
-    return html`
-    <anypoint-input
-      class="uri-input"
-      @input=${this._handleUriChange}
-      value="${selectedValue}"
-      ?compatibility="${compatibility}"
-      ?outlined="${outlined}"
-    >
-      <label slot="label">Base URI</label>
-      <anypoint-icon-button
-        aria-label="Activate to clear and close custom editor"
-        title="Clear and close custom editor"
-        slot="suffix"
-        @click="${this._resetSelection}"
-        ?compatibility="${compatibility}"
-      >
-        <span class="icon">${close}</span>
-      </anypoint-icon-button>
-  </anypoint-input>`;
-  }
-
-  _renderDropdown() {
-    const { compatibility, outlined, _selectedIndex } = this;
-    return html`
-    <anypoint-dropdown-menu
-      class="api-server-dropdown"
-      ?compatibility="${compatibility}"
-      ?outlined="${outlined}"
-    >
-      <label slot="label">Select server</label>
-      <anypoint-listbox
-        .selected="${_selectedIndex}"
-        @selected-changed="${this._handleSelectionChanged}"
-        slot="dropdown-content"
-        tabindex="-1"
-        ?compatibility="${compatibility}"
-        ?outlined="${outlined}"
-      >
-        ${this._renderItems()}
-      </anypoint-listbox>
-    </anypoint-dropdown-menu>`;
+    return html`<slot
+      @slotchange="${this._childrenHandler}"
+      name="custom-base-uri"
+    ></slot>`;
   }
 }

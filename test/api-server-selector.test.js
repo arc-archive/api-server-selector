@@ -1,4 +1,4 @@
-import { fixture, assert, nextFrame } from '@open-wc/testing';
+import { fixture, assert, nextFrame, html } from '@open-wc/testing';
 import { AmfLoader } from './amf-loader.js';
 import { AmfHelper } from './amf-helper.js';
 import '../api-server-selector.js';
@@ -12,9 +12,9 @@ describe('<api-server-selector>', () => {
     return (await fixture(`<api-server-selector allowCustom></api-server-selector>`));
   }
 
-  async function extraOptionsFixture() {
-    return (await fixture(`
-      <api-server-selector>
+  async function extraOptionsFixture(amf) {
+    return (await fixture(html`
+      <api-server-selector .amf="${amf}">
         <anypoint-item slot="custom-base-uri" value="http://customServer.com">
           http://customServer.com
         </anypoint-item>
@@ -633,6 +633,25 @@ describe('<api-server-selector>', () => {
           await nextFrame();
           const item = element.shadowRoot.querySelector('anypoint-input');
           assert.isTrue(item.hasAttribute('outlined'));
+        });
+      });
+
+      describe.only('slot elements', () => {
+        let amf;
+        let element;
+
+        before(async () => {
+          amf = await AmfLoader.load(compact);
+        });
+
+        beforeEach(async () => {
+          element = await extraOptionsFixture(amf);
+        });
+
+        it('selects slot value', async () => {
+          element._selectedIndex = 5;
+          await nextFrame();
+          assert.equal(element.selectedValue, 'http://customServer2.com');
         });
       });
     });
