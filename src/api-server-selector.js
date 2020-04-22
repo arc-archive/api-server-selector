@@ -74,6 +74,16 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
        * If activated, server selector will not be visible
        */
       hidden: { type: Boolean, reflect: true },
+
+      /**
+       * Enables outlined material theme
+       */
+      outlined: { type: Boolean },
+
+      /**
+       * Enables compatybility with the anypoint platform
+       */
+      compatibility: { type: Boolean },
     };
   }
 
@@ -96,7 +106,7 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
     :host([hidden]) {
       display: none;
     }
-    
+
     .api-server-dropdown, .uri-input {
       width: calc(100% - 16px);
       max-width: 700px;
@@ -536,11 +546,15 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
    * @return {TemplateResult} Custom URI `anypoint-item`
    */
   _renderCustomURIOption() {
-    const { allowCustom } = this
+    const { allowCustom, compatibility } = this
     if (!allowCustom) {
       return '';
     }
-    return html`<anypoint-item class="custom-option" value="custom">Custom base URI</anypoint-item>`;
+    return html`<anypoint-item
+      class="custom-option"
+      value="custom"
+      ?compatibility="${compatibility}"
+    >Custom base URI</anypoint-item>`;
   }
 
   _getServerUri(server) {
@@ -549,10 +563,13 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
   }
 
   _renderServerOptions() {
-    const { servers } = this;
+    const { servers, compatibility } = this;
 
     const toAnypointItem = (server) => {
-      return html`<anypoint-item value="${this._getServerValue(server)}">
+      return html`<anypoint-item
+        value="${this._getServerValue(server)}"
+        ?compatibility="${compatibility}"
+      >
         ${this._getServerUri(server)}
       </anypoint-item>`;
     };
@@ -568,28 +585,44 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
   }
 
   _renderUriInput() {
-    return html`<anypoint-input class="uri-input" @input=${this._handleUriChange} value="${this.selectedValue}">
-    <label slot="label">Base URI</label>
-    <anypoint-icon-button
-      aria-label="Activate to clear and close custom editor"
-      title="Clear and close custom editor"
-      slot="suffix"
-      @click="${this._resetSelection}"
+    const { compatibility, outlined, selectedValue } = this;
+    return html`
+    <anypoint-input
+      class="uri-input"
+      @input=${this._handleUriChange}
+      value="${selectedValue}"
+      ?compatibility="${compatibility}"
+      ?outlined="${outlined}"
     >
-      <span class="icon">${close}</span>
-    </anypoint-icon-button>
+      <label slot="label">Base URI</label>
+      <anypoint-icon-button
+        aria-label="Activate to clear and close custom editor"
+        title="Clear and close custom editor"
+        slot="suffix"
+        @click="${this._resetSelection}"
+        ?compatibility="${compatibility}"
+      >
+        <span class="icon">${close}</span>
+      </anypoint-icon-button>
   </anypoint-input>`;
   }
 
   _renderDropdown() {
+    const { compatibility, outlined, _selectedIndex } = this;
     return html`
-    <anypoint-dropdown-menu class="api-server-dropdown">
+    <anypoint-dropdown-menu
+      class="api-server-dropdown"
+      ?compatibility="${compatibility}"
+      ?outlined="${outlined}"
+    >
       <label slot="label">Select server</label>
       <anypoint-listbox
-        .selected="${this._selectedIndex}"
+        .selected="${_selectedIndex}"
         @selected-changed="${this._handleSelectionChanged}"
         slot="dropdown-content"
         tabindex="-1"
+        ?compatibility="${compatibility}"
+        ?outlined="${outlined}"
       >
         ${this._renderItems()}
       </anypoint-listbox>
