@@ -163,20 +163,6 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
     this.requestUpdate('allowCustom', old);
   }
 
-  set amf(model) {
-    const old = this._amf;
-    if (old === model) {
-      return;
-    }
-
-    this._amf = model;
-    this.updateServers();
-  }
-
-  get amf() {
-    return this._amf;
-  }
-
   get baseUri() {
     return this._baseUri;
   }
@@ -274,6 +260,10 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
     const customServer = allowCustom ? 1 : 0
     const serversCount = this._getServersCount() + customServer;
     this.dispatchEvent(new CustomEvent('servers-count-changed', { detail: { serversCount } }));
+  }
+
+  __amfChanged() {
+    this.updateServers();
   }
 
   _isValueValid(value) {
