@@ -637,4 +637,49 @@ describe('<api-server-selector>', () => {
       });
     });
   });
+
+  describe('onapiserverchange', () => {
+    let element;
+    beforeEach(async () => {
+      element = await basicFixture();
+    });
+
+    it('sets an event listener', () => {
+      const fn = () => {};
+      element.onapiserverchange = fn;
+      assert.isTrue(element.onapiserverchange === fn);
+    });
+
+    it('calls the callback function', () => {
+      let called = false;
+      const fn = () => { called = true; };
+      element.onapiserverchange = fn;
+      element.selectedType = 'custom';
+      element.selectedValue = 'https://example.com';
+      assert.isTrue(called);
+    });
+
+    it('clears the callback function', () => {
+      let called = false;
+      const fn = () => { called = true; };
+      element.onapiserverchange = fn;
+      element.onapiserverchange = null;
+      element.selectedType = 'custom';
+      element.selectedValue = 'https://example.com';
+      assert.isFalse(called);
+    });
+
+    it('unregisters old function', () => {
+      let called1 = false;
+      let called2 = false;
+      const fn1 = () => { called1 = true; };
+      const fn2 = () => { called2 = true; };
+      element.onapiserverchange = fn1;
+      element.onapiserverchange = fn2;
+      element.selectedType = 'custom';
+      element.selectedValue = 'https://example.com';
+      assert.isFalse(called1);
+      assert.isTrue(called2);
+    });
+  });
 });

@@ -6,6 +6,8 @@ import { close } from '@advanced-rest-client/arc-icons/ArcIcons.js';
 
 /** @typedef {import('lit-html').TemplateResult} TemplateResult */
 
+const apiChangeEventType = 'api-server-changed';
+
 /**
  * `api-server-selector`
  * An element to generate view model for server
@@ -203,7 +205,7 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
       this._selectedValue = selectedValue;
       this.requestUpdate('selectedValue', old);
       this.dispatchEvent(
-        new CustomEvent('api-server-changed', {
+        new CustomEvent(apiChangeEventType, {
           detail: {
             selectedValue,
             selectedType,
@@ -220,6 +222,28 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
    */
   get isCustom() {
     return this.selectedType === 'custom';
+  }
+
+  get onapiserverchange() {
+    return this._onapiserverchange;
+  }
+
+  /**
+   * @param {EventListenerObject} value A callback function to be called
+   * when `api-server-changed` event is dispatched.
+   */
+  set onapiserverchange(value) {
+    const old = this._onapiserverchange;
+    if (old) {
+      this.removeEventListener(apiChangeEventType, old);
+    }
+    const isFn = typeof value === 'function';
+    if (isFn) {
+      this._onapiserverchange = value;
+      this.addEventListener(apiChangeEventType, value);
+    } else {
+      this._onapiserverchange = null;
+    }
   }
 
   _attachListeners(node) {
