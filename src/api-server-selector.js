@@ -54,7 +54,13 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
        * Holds the current servers to show in in the dropdown menu
        */
       servers: { type: Array },
+      /**
+       * The currently selected endpoint in the AMF model.
+       */
       endpointId: { type: String },
+      /**
+       * The currently selected operation in the AMF model.
+       */
       methodId: { type: String },
       /**
        * Currently selected type of an base URI.

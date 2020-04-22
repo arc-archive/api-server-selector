@@ -75,7 +75,15 @@ declare class ApiServerSelector extends
    * Always a URI value
    */
   selectedValue: string|null|undefined;
+
+  /**
+   * The currently selected operation in the AMF model.
+   */
   methodId: string|null|undefined;
+
+  /**
+   * The currently selected endpoint in the AMF model.
+   */
   endpointId: string|null|undefined;
   readonly isCustom: Boolean|null;
 
@@ -94,6 +102,16 @@ declare class ApiServerSelector extends
    * If activated, server selector will not be visible
    */
   hidden: boolean|null|undefined;
+
+  /**
+   * Enables outlined material theme
+   */
+  outlined: boolean|null|undefined;
+
+  /**
+   * Enables compatybility with the anypoint platform
+   */
+  compatibility: boolean|null|undefined;
   constructor();
   firstUpdated(): void;
   render(): any;
