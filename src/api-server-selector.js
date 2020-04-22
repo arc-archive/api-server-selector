@@ -213,31 +213,6 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
     }
   }
 
-  get methodId() {
-    return this._methodId;
-  }
-
-  set methodId(value) {
-    const old = this._methodId;
-    if (value === old) {
-      return;
-    }
-    this._methodId = value;
-  }
-
-  get endpointId() {
-    return this._endpointId;
-  }
-
-  set endpointId(value) {
-    const old = this._endpointId;
-    if (value === old) {
-      return;
-    }
-
-    this._endpointId = value;
-  }
-
   /**
    * @return {Boolean} True if selected type is "custom" type.
    */
