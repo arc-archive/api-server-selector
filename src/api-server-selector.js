@@ -4,6 +4,8 @@ import { EventsTargetMixin } from '@advanced-rest-client/events-target-mixin/eve
 import '@anypoint-web-components/anypoint-input/anypoint-input.js';
 import { close } from '@advanced-rest-client/arc-icons/ArcIcons.js';
 
+/** @typedef {import('lit-html').TemplateResult} TemplateResult */
+
 /**
  * `api-server-selector`
  * An element to generate view model for server
@@ -87,7 +89,7 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
       outlined: { type: Boolean },
 
       /**
-       * Enables compatybility with the anypoint platform
+       * Enables compatibility with the anypoint platform
        */
       compatibility: { type: Boolean },
     };
@@ -99,7 +101,7 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
   }
 
   firstUpdated() {
-    this._notifyServersCount()
+    this._notifyServersCount();
   }
 
   get styles() {
@@ -194,7 +196,7 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
     }
 
     if (this._isValueValid(value)) {
-      const selectedIndex = this._getIndexForValue(value)
+      const selectedIndex = this._getIndexForValue(value);
       const selectedValue = value;
       const selectedType = this.selectedType;
       this._selectedIndex = selectedIndex;
@@ -231,8 +233,8 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
   }
 
   _notifyServersCount() {
-    const { allowCustom = false } = this
-    const customServer = allowCustom ? 1 : 0
+    const { allowCustom = false } = this;
+    const customServer = allowCustom ? 1 : 0;
     const serversCount = this._getServersCount() + customServer;
     this.dispatchEvent(new CustomEvent('servers-count-changed', { detail: { serversCount } }));
   }
@@ -262,7 +264,7 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
     if (!servers) {
       return undefined;
     }
-    return servers.find(server => this._getServerUri(server) === value)
+    return servers.find(server => this._getServerUri(server) === value);
   }
 
   _findServerById(id) {
@@ -270,7 +272,7 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
     if (!servers) {
       return undefined;
     }
-    return servers.find(server => this._getServerValue(server) === id)
+    return servers.find(server => this._getServerValue(server) === id);
   }
 
   _getIndexForSlotValue(value) {
@@ -318,12 +320,12 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
     }
     let newIndex;
     let newValue = this._selectedValue;
-    const isModelServerSelected = this._selectedIndex < oldServers.length
+    const isModelServerSelected = this._selectedIndex < oldServers.length;
     if (!this.servers) {
       newIndex = undefined;
       newValue = undefined;
     } else if (isModelServerSelected) {
-      const indexInNewServers = this._getIndexOfServerByUri(this._selectedValue, this.servers)
+      const indexInNewServers = this._getIndexOfServerByUri(this._selectedValue, this.servers);
       if (indexInNewServers > -1) {
         newIndex = indexInNewServers;
       } else {
@@ -331,10 +333,10 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
         newValue = undefined;
       }
     } else {
-      const serverOffest = this.servers.length - oldServers.length;
-      newIndex = this._selectedIndex + serverOffest;
+      const serverOffset = this.servers.length - oldServers.length;
+      newIndex = this._selectedIndex + serverOffset;
     }
-    this._changeSelected({ selectedIndex: newIndex, selectedValue: newValue })
+    this._changeSelected({ selectedIndex: newIndex, selectedValue: newValue });
   }
 
   _getIndexOfServerByUri(value, servers) {
@@ -397,7 +399,7 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
    * @param {CustomEvent} e
    */
   _handleSelectionChanged(e) {
-    const { selectedItem } = e.target;
+    const { selectedItem } = /** @type {any} */ (e.target);
     const selectedIndex = e.detail.value;
     if (!selectedItem) {
       return;
@@ -451,7 +453,7 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
    */
   _getExtraServers() {
     const slot = this.shadowRoot.querySelector('slot[name="custom-base-uri"]');
-    return slot ? slot.assignedElements({ flatten: true }) : [];
+    return slot ? ( /** @type HTMLSlotElement */ (slot)).assignedElements({ flatten: true }) : [];
   }
 
   /**
@@ -460,7 +462,7 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
    * @return {Number} total amount of servers being rendered
    */
   _getServersCount() {
-    const { servers = [] } = this
+    const { servers = [] } = this;
     const extraServers = this._getExtraServers();
     return servers.length + extraServers.length;
   }
@@ -469,8 +471,8 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
     if (selectedIndex === null || selectedIndex === undefined) {
       return undefined;
     }
-    const { servers = [] } = this
-    const customUriIndex = this._getServersCount()
+    const { servers = [] } = this;
+    const customUriIndex = this._getServersCount();
     if (selectedIndex < servers.length) {
       return 'server';
     } else if (selectedIndex === customUriIndex) {
@@ -491,10 +493,9 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
 
   render() {
     const { styles, isCustom } = this;
-    return html`<style>${styles}</style>
-    ${isCustom
-        ? this._renderUriInput()
-        : this._renderDropdown()}
+    return html`
+    <style>${styles}</style>
+    ${isCustom ? this._renderUriInput() : this._renderDropdown()}
     `;
   }
 
@@ -514,10 +515,10 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
   }
 
   /**
-   * @return {TemplateResult} Custom URI `anypoint-item`
+   * @return {TemplateResult|string} Custom URI `anypoint-item`
    */
   _renderCustomURIOption() {
-    const { allowCustom, compatibility } = this
+    const { allowCustom, compatibility } = this;
     if (!allowCustom) {
       return '';
     }
