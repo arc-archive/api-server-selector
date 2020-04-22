@@ -5,15 +5,11 @@
 
 ## &lt;api-server-selector&gt;
 
-Custom element that renders and manages Servers state in AMF powered application
+Custom element that renders a list of servers encoded in an API specification powered by the AMF model.
 
 ## Version compatibility
 
 This version only works with AMF model version 2 (AMF parser >= 4.0.0).
-
-### API components
-
-This components is a part of [API components ecosystem](https://elements.advancedrestclient.com/)
 
 ## Usage
 
@@ -37,7 +33,7 @@ npm install --save @api-components/api-server-selector
 </html>
 ```
 
-### In a Polymer 3 element
+### In a LitElement
 
 ```js
 import { LitElement, html } from 'lit-element';
@@ -55,18 +51,28 @@ customElements.define('sample-element', SampleElement);
 
 ### Subscribing to change events
 
-Component dispatches events of type `api-server-changed` when the server value changes.
+The component dispatches the `api-server-changed` custom event when the server selection changes.
 
 ```js
-addEventListener('api-server-changed', function(e) {
-    const { value } = e.detail;
-    // value is the url
+element.addEventListener('api-server-changed', function(e) {
+    const { selectedValue, selectedType } = e.detail;
+    // selectedValue is the selected base URI
+    // selectedType tells whether it's a server defined value of a custom property
+    // This is also the same as const { selectedValue, selectedType } = e.target;
 });
 ```
 
-When `Custom URL` is selected, each input change dispatches an `api-server-changed` event with the current value of the input.
+When `Custom URL` is selected, a change in the input field dispatches the `api-server-changed` event with the current value of the input.
 
-## Local installation
+Additionally the element supports `onapiserverchange` setter for event callback function:
+
+```javascript
+element.onapiserverchange = (e) => {
+  // ...
+};
+```
+
+## Development
 
 ```sh
 git clone https://github.com/advanced-rest-client/api-server-selector
