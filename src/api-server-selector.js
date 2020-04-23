@@ -578,6 +578,7 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
         ?compatibility="${compatibility}"
         ?outlined="${outlined}"
         attrforselected="value"
+        selectable="[value]"
       >
         ${this._renderItems()}
       </anypoint-listbox>

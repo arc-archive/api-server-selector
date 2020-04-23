@@ -74,6 +74,21 @@ describe('<api-server-selector>', () => {
     `));
   }
 
+  async function unselectableFixture(amf) {
+    return (await fixture(html`
+      <api-server-selector
+        .amf="${amf}"
+      >
+      <anypoint-item slot="custom-base-uri">
+        srv 1
+      </anypoint-item>
+      <anypoint-item slot="custom-base-uri" value="http://srv.com">
+        srv 2
+      </anypoint-item>
+      </api-server-selector>
+    `));
+  }
+
   describe('basic usage', () => {
     it('renders empty dropdown', async () => {
       const element = await basicFixture();
@@ -559,6 +574,27 @@ describe('<api-server-selector>', () => {
           });
           await nextFrame();
           assert.equal(element.value, 'http://beta.api.openweathermap.org/data/2.5/');
+        });
+      });
+
+      describe('items without a value', () => {
+        let element;
+        let amf;
+
+        before(async () => {
+          amf = await AmfLoader.load(compact);
+        });
+
+        beforeEach(async () => {
+          element = await unselectableFixture(amf);
+        });
+
+        it('do not select element that has no value', () => {
+          // first item has no value
+          const node = element.querySelector('anypoint-item');
+          node.click();
+
+          assert.equal(element.value, '');
         });
       });
     });

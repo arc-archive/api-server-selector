@@ -150,11 +150,28 @@ class DemoPage extends ApiDemoPage {
     if (!this.renderCustom) {
       return;
     }
-    return html`<anypoint-item slot="custom-base-uri" value="http://customServer.com">
-      http://customServer.com
+    const { compatibility } = this;
+    return html`
+    <div class="other-section" slot="custom-base-uri">Other options</div>
+    <anypoint-item
+      slot="custom-base-uri"
+      value="http://customServer.com"
+      ?compatibility="${compatibility}"
+    >
+      Mocking service
     </anypoint-item>
-    <anypoint-item slot="custom-base-uri" value="http://customServer2.com">
-      http://customServer2.com
+    <anypoint-item
+      slot="custom-base-uri"
+      value="http://customServer2.com"
+      ?compatibility="${compatibility}"
+    >
+      Custom instance
+    </anypoint-item>
+    <anypoint-item
+      slot="custom-base-uri"
+      ?compatibility="${compatibility}"
+    >
+      Unselectable
     </anypoint-item>`;
   }
 
