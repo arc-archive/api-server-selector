@@ -91,6 +91,37 @@ element.onserverscountchange = (e) => {
 };
 ```
 
+### Custom servers
+
+Sometimes the hosting application may want to define additional list of servers to render in the selector, other than the ones defined in the API sepcification. This can relate to additional services working with the components like a proxy or mocking service.
+
+The element accepts list items as children that are insterted after the API defined servers.
+We recommend using `anypoint-item` as it is already used to build the selecotr. However, it can be any HTML element. For a list item to be rendered it has to have `slot="custom-base-uri"` attribute. For the item to be selectable in the list it has to have the `value="..."` attribute.
+If the value is missing then the item is rendered but the selector won't react on the list item click.
+
+```html
+<api-server-selector>
+  <div slot="custom-base-uri">Other options</div>
+  <anypoint-item slot="custom-base-uri" value="http://mocking.com">Mocking service</anypoint-item>
+  <anypoint-item slot="custom-base-uri"><input type="checkbox"/> Configuration option</anypoint-item>
+</api-server-selector>
+```
+
+When you decide to use a list item without a value, a click on an item won't close the selector. When the user perform the action related to the item then use `opened` property on the selector to close the drop down.
+
+```html
+<api-server-selector>
+  <div slot="custom-base-uri">Other options</div>
+  <anypoint-item slot="custom-base-uri"><input type="checkbox" id="option"/> Configuration option</anypoint-item>
+</api-server-selector>
+
+<script>
+option.onclick = (e) => {
+  e.target.parentNode.opened = false;
+};
+</script>
+```
+
 ## Development
 
 ```sh
