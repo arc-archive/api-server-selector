@@ -1,4 +1,4 @@
-import { html, css } from 'lit-element';
+import { html } from 'lit-element';
 import { ApiDemoPage } from '@advanced-rest-client/arc-demo-helper';
 import '@advanced-rest-client/arc-demo-helper/arc-interactive-demo.js';
 import '@anypoint-web-components/anypoint-checkbox/anypoint-checkbox.js';
@@ -15,6 +15,8 @@ class DemoPage extends ApiDemoPage {
       'servers',
       'selectedServer',
       'allowCustom',
+      'serversCount',
+      'autoSelect',
     ]);
     this.componentName = 'api-server-selector';
     this.renderViewControls = true;
@@ -22,15 +24,9 @@ class DemoPage extends ApiDemoPage {
     this.demoStates = ['Filled', 'Outlined', 'Anypoint'];
     this.renderCustom = false;
     this.allowCustom = false;
+    this.autoSelect = false;
     this._apiSrvHandler = this._apiSrvHandler.bind(this);
-  }
-
-  get styles() {
-    return css`
-      .selector-container {
-        width: 80%;
-      }
-    `
+    this._countHandler = this._countHandler.bind(this);
   }
 
   _demoStateHandler(e) {
@@ -65,12 +61,17 @@ class DemoPage extends ApiDemoPage {
     }
     // the result should be set on the `servers` variable which is "observable"
     this.servers = this._getServers(opts);
-    console.log(this.servers);
+    // console.log(this.servers);
   }
 
   _apiSrvHandler(e) {
-    const { value } = e.detail;
+    const { value, type } = e.detail;
     this.selectedServer = value;
+    console.log('Selection changed', value, type);
+  }
+
+  _countHandler(e) {
+    this.serversCount = e.detail.value;
   }
 
   _demoTemplate() {
@@ -84,9 +85,10 @@ class DemoPage extends ApiDemoPage {
       servers,
       allowCustom,
       selectedServer,
-      styles
+      serversCount,
+      autoSelect,
     } = this;
-    return html`<style>${styles}</style>
+    return html`
       <section class="documentation-section">
         <h3>Interactive demo</h3>
         <p>
@@ -106,8 +108,10 @@ class DemoPage extends ApiDemoPage {
               ?compatibility="${compatibility}"
               ?allowCustom="${allowCustom}"
               ?outlined="${outlined}"
+              ?autoSelect="${autoSelect}"
               .servers="${servers}"
-              @api-server-changed="${this._apiSrvHandler}"
+              @apiserverchanged="${this._apiSrvHandler}"
+              @serverscountchanged="${this._countHandler}"
             >
             ${this._extraSlotItems()}
             </api-server-selector>
@@ -127,9 +131,17 @@ class DemoPage extends ApiDemoPage {
             @change="${this._toggleMainOption}"
             >Allow Custom</anypoint-checkbox
           >
+          <anypoint-checkbox
+            aria-describedby="mainOptionsLabel"
+            slot="options"
+            name="autoSelect"
+            @change="${this._toggleMainOption}"
+            >Auto select server</anypoint-checkbox
+          >
         </arc-interactive-demo>
 
         ${selectedServer ? html`<p>Selected: ${selectedServer}</p>` : ''}
+        ${serversCount ? html`<p>Servers count: ${serversCount}</p>` : ''}
       </section>
     `;
   }
@@ -138,11 +150,28 @@ class DemoPage extends ApiDemoPage {
     if (!this.renderCustom) {
       return;
     }
-    return html`<anypoint-item slot="custom-base-uri" value="http://customServer.com">
-      http://customServer.com
+    const { compatibility } = this;
+    return html`
+    <div class="other-section" slot="custom-base-uri">Other options</div>
+    <anypoint-item
+      slot="custom-base-uri"
+      value="http://customServer.com"
+      ?compatibility="${compatibility}"
+    >
+      Mocking service
     </anypoint-item>
-    <anypoint-item slot="custom-base-uri" value="http://customServer2.com">
-      http://customServer2.com
+    <anypoint-item
+      slot="custom-base-uri"
+      value="http://customServer2.com"
+      ?compatibility="${compatibility}"
+    >
+      Custom instance
+    </anypoint-item>
+    <anypoint-item
+      slot="custom-base-uri"
+      ?compatibility="${compatibility}"
+    >
+      Unselectable
     </anypoint-item>`;
   }
 

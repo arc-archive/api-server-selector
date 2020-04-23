@@ -6,27 +6,66 @@
       "description": "A component with a title and an action counter",
       "properties": [
         {
-          "name": "title",
+          "name": "baseUri",
           "type": "String",
-          "description": "The title of your component",
-          "default": "Hey there"
+          "description": "The baseUri to override any server definition"
         },
         {
-          "name": "counter",
-          "type": "Number",
-          "description": "An action counter",
-          "default": 0
+          "name": "allowCustom",
+          "type": "Boolean",
+          "description": "When set the `Custom base URI` is rendered in the dropdown",
+          "default": false
+        },
+        {
+          "name": "servers",
+          "type": "Array",
+          "description": "The current list of servers to render"
+        },
+        {
+          "name": "type",
+          "type": "String",
+          "description": "Currently selected type of the input. Can be `server`, `uri`, or `custom`"
+        },
+        {
+          "name": "value",
+          "type": "String",
+          "description": "Current value of the server"
+        },
+        {
+          "name": "outlined",
+          "type": "Booelan",
+          "description": "Enables outlined material theme"
+        },
+        {
+          "name": "compatibility",
+          "type": "Booelan",
+          "description": "Enables compatibility with the anypoint platform"
+        },
+        {
+          "name": "autoSelect",
+          "type": "Booelan",
+          "description": "When set it automaticallt selected the first server from the list of servers when selection is missing."
+        },
+        {
+          "name": "opened",
+          "type": "Booelan",
+          "description": "A programmatic access to the opened state of the drop down.\nNote, this does nothing when custom element is rendered."
         }
       ],
-      "events": [],
-      "slots": [],
-      "cssProperties": [
+      "events": [
         {
-          "name": "--api-server-selector-text-color",
-          "description": "Main Text Color",
-          "type": "Color"
+          "name": "apiserverchanged"
+        },
+        {
+          "name": "serverscountchanged"
         }
-      ]
+      ],
+      "slots": [
+        {
+          "name": "custom-base-uri"
+        }
+      ],
+      "cssProperties": []
     }
   ]
 }
