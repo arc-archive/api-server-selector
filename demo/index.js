@@ -24,6 +24,7 @@ class DemoPage extends ApiDemoPage {
     this.demoStates = ['Filled', 'Outlined', 'Anypoint'];
     this.renderCustom = false;
     this.allowCustom = false;
+    this.autoSelect = false;
     this._apiSrvHandler = this._apiSrvHandler.bind(this);
     this._countHandler = this._countHandler.bind(this);
   }
@@ -64,13 +65,13 @@ class DemoPage extends ApiDemoPage {
   }
 
   _apiSrvHandler(e) {
-    const { selectedValue, selectedType } = e.detail;
-    this.selectedServer = selectedValue;
-    console.log('Selection changed', selectedValue, selectedType);
+    const { value, type } = e.detail;
+    this.selectedServer = value;
+    console.log('Selection changed', value, type);
   }
 
   _countHandler(e) {
-    this.serversCount = e.detail.serversCount;
+    this.serversCount = e.detail.value;
   }
 
   _demoTemplate() {
@@ -109,8 +110,8 @@ class DemoPage extends ApiDemoPage {
               ?outlined="${outlined}"
               ?autoSelect="${autoSelect}"
               .servers="${servers}"
-              @api-server-changed="${this._apiSrvHandler}"
-              @servers-count-changed="${this._countHandler}"
+              @apiserverchanged="${this._apiSrvHandler}"
+              @serverscountchanged="${this._countHandler}"
             >
             ${this._extraSlotItems()}
             </api-server-selector>

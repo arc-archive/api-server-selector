@@ -12,7 +12,7 @@
 // tslint:disable:variable-name Describing an API that's defined elsewhere.
 // tslint:disable:no-any describes the API as best we are able today
 
-import {html, LitElement, css} from 'lit-element';
+import {html, LitElement} from 'lit-element';
 
 import {AmfHelperMixin} from '@api-components/amf-helper-mixin/amf-helper-mixin.js';
 
@@ -51,14 +51,13 @@ declare class ApiServerSelector extends
   AmfHelperMixin(
   EventTargetMixin(
   LitElement)) {
-  amf: any;
   readonly styles: any;
+  readonly _listItems: Array<Element|null>|null;
 
   /**
    * Holds the current servers to show in in the dropdown menu
    */
   servers: any[]|null|undefined;
-  readonly selected: any;
 
   /**
    * If activated, `Custom base URI` will be in the dropdown options
@@ -74,34 +73,17 @@ declare class ApiServerSelector extends
    * Current value of the server
    * Always a URI value
    */
-  selectedValue: string|null|undefined;
-
-  /**
-   * The currently selected operation in the AMF model.
-   */
-  methodId: string|null|undefined;
-
-  /**
-   * The currently selected endpoint in the AMF model.
-   */
-  endpointId: string|null|undefined;
+  value: String|null;
   readonly isCustom: Boolean|null;
+  onapiserverchange: EventListenerObject|null;
+  onserverscountchange: EventListenerObject|null;
+  readonly _serversCount: Number|null;
 
   /**
    * Currently selected type of an base URI.
-   * `server` | `slot` | `custom`
+   * `server` | `uri` | `custom`
    */
-  selectedType: string|null|undefined;
-
-  /**
-   * Current selected server index
-   */
-  _selectedIndex: number|null|undefined;
-
-  /**
-   * If activated, server selector will not be visible
-   */
-  hidden: boolean|null|undefined;
+  type: string|null|undefined;
 
   /**
    * Enables outlined material theme
@@ -109,36 +91,78 @@ declare class ApiServerSelector extends
   outlined: boolean|null|undefined;
 
   /**
-   * Enables compatybility with the anypoint platform
+   * Enables compatibility with the anypoint platform
    */
   compatibility: boolean|null|undefined;
+
+  /**
+   * Holds the size of rendered custom servers.
+   */
+  _customNodesCount: number|null|undefined;
+
+  /**
+   * When set it automaticallt selected the first server from the list
+   * of servers when selection is missing.
+   */
+  autoSelect: boolean|null|undefined;
   constructor();
   firstUpdated(): void;
   render(): any;
   _attachListeners(node: any): void;
   _detachListeners(node: any): void;
-  _notifyServersCount(): void;
-  _isValueValid(value: any): any;
-  _findServerByValue(value: any): any;
-  _findServerById(id: any): any;
-  _getIndexForSlotValue(value: any): any;
-  _getIndexForValue(value: any): any;
-  _handleNavigationChange(e: any): void;
-  _checkForSelectedChange(oldServers: any): void;
-  _getIndexOfServerByUri(value: any, servers: any): any;
 
   /**
-   * Search for a server in a list of search, comparing against AMF id
-   *
-   * @param serverId The desired server to search for
-   * @param servers The list of AMF server models to search in,
-   * @returns The index of the server, or -1 if not found
+   * Dispatches the `servers-count-changed` event with the current number of rendered servers.
    */
-  _getIndexOfServer(serverId: String|null, servers: any[]|null): Number|null;
-  _getServerValue(server: any): any;
+  _notifyServersCount(): void;
 
   /**
-   * Update component's servers
+   * A handler called when slotted number of children change.
+   * It sets `_customNodesCount` proeprty with the number of properties
+   * and notifies the change.
+   */
+  _childrenHandler(): void;
+
+  /**
+   * Executes auto selection logic.
+   * It selectes a fist available sever from the serves list when AMF or operation
+   * selection changed.
+   * When there's already valid selection then it does nothing.
+   */
+  selectIfNeeded(): void;
+
+  /**
+   * Collects information about selection from the current value.
+   *
+   * @param value Current value for the server URI.
+   * @returns A selection info object
+   */
+  _selectionInfo(value?: String|null): SelectionInfo|null;
+
+  /**
+   * Handler for the `api-navigation-selection-changed` event.
+   */
+  _handleNavigationChange(e: CustomEvent|null): any;
+
+  /**
+   * Takes care of recognizing whether a server selection should be cleared.
+   * This happes when list of servers change and with the new list of server
+   * current selection does not exist.
+   * This ignores the selection when current type is not a `server`.
+   *
+   * @param servers List of new servers
+   */
+  _updateServerSelection(servers: Array<object|null>|null): void;
+
+  /**
+   * @param servers List of current servers
+   * @param value The value to look for
+   * @returns The index of found server or -1 if none found.
+   */
+  _getServerIndexByUri(servers: Array<object|null>|null, value: String|null): Number|null;
+
+  /**
+   * Update component's servers.
    */
   updateServers({
   id,
@@ -150,12 +174,6 @@ declare class ApiServerSelector extends
    * Handler for the listbox's change event
    */
   _handleSelectionChanged(e: CustomEvent|null): void;
-  _isServerIndex(index: any): any;
-  _isCustomIndex(index: any): any;
-  _changeSelected({
-  selectedIndex,
-  selectedValue
-} = {}: any): void;
 
   /**
    * Retrieves custom base uris elements assigned to the
@@ -163,17 +181,35 @@ declare class ApiServerSelector extends
    *
    * @returns Elements assigned to custom-base-uri slot
    */
-  _getExtraServers(): any[]|null;
+  _getExtraServers(): Array<Element|null>|null;
 
   /**
-   * Retrieves the total amount of servers being rendered, without counting customServer
-   *
-   * @returns total amount of servers being rendered
+   * Handler for the input field change.
    */
-  _getServersCount(): Number|null;
-  _getSelectedType(selectedIndex: any): any;
-  _handleUriChange(event: any): void;
+  _handleUriChange(e: Event|null): void;
+
+  /**
+   * Resets current selection to a default value.
+   */
   _resetSelection(): void;
+
+  /**
+   * Computes the URI of a server.
+   *
+   * @param server Server definition to get the value from.
+   * @returns Server base URI.
+   */
+  _getServerUri(server: object|null): String|null;
+
+  /**
+   * @returns Template result for the custom input.
+   */
+  _uriInputTemplate(): TemplateResult|null;
+
+  /**
+   * @returns Template result for the drop down element.
+   */
+  _renderDropdown(): TemplateResult|null;
 
   /**
    * Call the render functions for
@@ -188,14 +224,16 @@ declare class ApiServerSelector extends
   /**
    * @returns Custom URI `anypoint-item`
    */
-  _renderCustomURIOption(): TemplateResult|null;
-  _getServerUri(server: any): any;
-  _renderServerOptions(): any;
+  _renderCustomURIOption(): TemplateResult|string|null;
 
   /**
-   * Returns template result with `slot` element
+   * @returns Template result for the drop down list
+   * options for current servers
+   */
+  _renderServerOptions(): Array<TemplateResult|null>|null;
+
+  /**
+   * @returns Template result for the `slot` element
    */
   _renderExtraSlot(): TemplateResult|null;
-  _renderUriInput(): any;
-  _renderDropdown(): any;
 }
