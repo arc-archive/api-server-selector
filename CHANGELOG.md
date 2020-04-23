@@ -148,3 +148,80 @@
 * add tests and test helpers [0ddd3f5](https://github.com/advanced-rest-client/api-server-selector/commit/0ddd3f57107567651dd62fde9b402e3ce1bb29d5) by Francisco Di Giandomenico
 
 
+<a name="0.4.0"></a>
+## [0.4.0](https://github.com/advanced-rest-client/api-server-selector/compare/0.0.1...0.4.0) (2020-04-23)
+
+### Build
+
+* bumping version [32563cd](https://github.com/advanced-rest-client/api-server-selector/commit/32563cdbfc0ca1a2fe9c94610932610baf01d736) by Pawel
+* bumping version [07d403b](https://github.com/advanced-rest-client/api-server-selector/commit/07d403b4ab8ff5ce2b00863a65338c9ebdc9865a) by Pawel
+* bump version [1da0e05](https://github.com/advanced-rest-client/api-server-selector/commit/1da0e0591922dd66f8c8ff49459d5b2f48f6d2de) by Leandro Bauret
+* bump version [568c258](https://github.com/advanced-rest-client/api-server-selector/commit/568c258d08c74e0da5659bd9dd86feba0e8d3d0e) by Francisco Di Giandomenico
+* bumping version [4514dbf](https://github.com/advanced-rest-client/api-server-selector/commit/4514dbf28450ede2f460c4572bfeed89689e1508) by Pawel Psztyc
+
+
+### Update
+
+* adding `opened` property to control dropdown state [747fddc](https://github.com/advanced-rest-client/api-server-selector/commit/747fddca28b5dd4893429581d5bac07ab364448c) by Pawel Psztyc
+* adding selector for the listbox [d5d48f4](https://github.com/advanced-rest-client/api-server-selector/commit/d5d48f469b1a70c5e6a95adeb7895133b0528b31) by Pawel Psztyc
+* finishing refactoring [37ff40f](https://github.com/advanced-rest-client/api-server-selector/commit/37ff40fbfa9a4564c0c3bb717f3490ecb16dc5ea) by Pawel
+* redesign of the element [e3edc1b](https://github.com/advanced-rest-client/api-server-selector/commit/e3edc1b4f75bb9193fd87e12bee73e5313f989b1) by Pawel
+* fixing as many linter issues as possible [694a2ae](https://github.com/advanced-rest-client/api-server-selector/commit/694a2ae1cc166b724ec6b5b1fbeb2d8f3b44b6a0) by Pawel
+* removing unnescesary setters [1780ee7](https://github.com/advanced-rest-client/api-server-selector/commit/1780ee757ff57644f7b78b3bf5b45b02e341decc) by Pawel
+* upgrading dependnecies [dff5bf6](https://github.com/advanced-rest-client/api-server-selector/commit/dff5bf6b2229f85fdaa4c85a65d6b8de78d4a261) by Pawel
+* Rename noCustom to allowCustom and modify stylings [e3b9d5f](https://github.com/advanced-rest-client/api-server-selector/commit/e3b9d5f376de30a784c2dc1d3210229f200a3266) by Leandro Bauret
+* notify servers changed when noCustom property is set [850cdbd](https://github.com/advanced-rest-client/api-server-selector/commit/850cdbdcfffec43f2c0512d5c1c861b441836fd4) by Leandro Bauret
+* add flatten property when calling slot assignedElements [c349533](https://github.com/advanced-rest-client/api-server-selector/commit/c3495331692875b006d7ab8c1e1aade441fe1f09) by Leandro Bauret
+* modify noCustom property and servers-count-changed [e6f6c84](https://github.com/advanced-rest-client/api-server-selector/commit/e6f6c84e81f28a3dd975b09d8d53d28f33341ddd) by Leandro Bauret
+* minor fixes [869afe8](https://github.com/advanced-rest-client/api-server-selector/commit/869afe833fdf497e43774a982047a853cafe6ac8) by Leandro Bauret
+* remove unnecessary comment [e79fffe](https://github.com/advanced-rest-client/api-server-selector/commit/e79fffed7a0327ff15793758366850b1d34f9834) by Francisco Di Giandomenico
+* [ci skip] automated merge master->stage. syncing main branches [8e98d81](https://github.com/advanced-rest-client/api-server-selector/commit/8e98d8193d0bb7afd57a1c23a5c28e8a8d5b9f2f) by Ci agent
+* upgrading dev dependencies [96532ae](https://github.com/advanced-rest-client/api-server-selector/commit/96532ae948509dedf2cb28c40b45b327f907c471) by Pawel Psztyc
+* [ci skip] automated merge master->stage. syncing main branches [3505674](https://github.com/advanced-rest-client/api-server-selector/commit/35056740900a4af0068fcd70518dbb095d662aa8) by Ci agent
+* remove unnecessary Array conversion [5001c66](https://github.com/advanced-rest-client/api-server-selector/commit/5001c66263c5a7c607bec9b28d9c81e0c419ed0f) by Leandro Bauret
+* use assignedElements and minor changes [6378efb](https://github.com/advanced-rest-client/api-server-selector/commit/6378efbdd062ad07287f657de25bad06a29a3f63) by Leandro Bauret
+* [ci skip] automated merge master->stage. syncing main branches [43ac490](https://github.com/advanced-rest-client/api-server-selector/commit/43ac4905071d4a4b626ce70f374be392c75940df) by Ci agent
+
+
+### Documentation
+
+* updating readme page [c1dbae7](https://github.com/advanced-rest-client/api-server-selector/commit/c1dbae7b00948b0a7aaf9f47382baaddf7e4f9f1) by Pawel Psztyc
+* updating readme file [e6ca101](https://github.com/advanced-rest-client/api-server-selector/commit/e6ca10142bc933d4279642da603ae190c52fe00d) by Pawel
+* updating readme file [fa85878](https://github.com/advanced-rest-client/api-server-selector/commit/fa8587809a0e3ff4563552d103f01696e1a70eda) by Pawel
+* updating docs and types [43aa401](https://github.com/advanced-rest-client/api-server-selector/commit/43aa4012efcd60c56c346557a433756559224ef3) by Pawel
+
+
+### Features
+
+* adding `onapiserverchange` setter [434a401](https://github.com/advanced-rest-client/api-server-selector/commit/434a401c2c18084e8d128f561ba4f92aa6f0b2a6) by Pawel
+* adding `compatibility` and `outlined` [d59277f](https://github.com/advanced-rest-client/api-server-selector/commit/d59277f7b085b79538111ce4e2bc5e8aea8d8c66) by Pawel
+* add api-servers-count-changed event when slot changes [f87e11e](https://github.com/advanced-rest-client/api-server-selector/commit/f87e11e722eafe464b7f68a58041ff3f189b819a) by Leandro Bauret
+* remove uri [2481c16](https://github.com/advanced-rest-client/api-server-selector/commit/2481c16a9f482d278b3e526d8ef603fa44de49cc) by Francisco Di Giandomenico
+* add hidden attribute [9b89207](https://github.com/advanced-rest-client/api-server-selector/commit/9b8920751b2729fb77ae28c82b59df5e30c998f5) by Francisco Di Giandomenico
+* add selectedValue setter and getter [352c479](https://github.com/advanced-rest-client/api-server-selector/commit/352c479c086fa0358bc0e25125f43147565ccf1a) by Francisco Di Giandomenico
+* add selectedValue and selectedType to dispatched event [d81db1b](https://github.com/advanced-rest-client/api-server-selector/commit/d81db1ba1933e918cfdab7a1ab2d6900d97b29ef) by Francisco Di Giandomenico
+* modify custom base uri slot and set baseUri behavior [a4fbfd8](https://github.com/advanced-rest-client/api-server-selector/commit/a4fbfd8d90dbf6624bbe241dbb7fd234ab888c11) by Leandro Bauret
+
+
+### Bug Fixes
+
+* use calc for dropdown and input width [a5b1cd6](https://github.com/advanced-rest-client/api-server-selector/commit/a5b1cd6eeb791313f19027359323873b9209eb08) by Leandro Bauret
+* remove margins from dropdown and input [97340e3](https://github.com/advanced-rest-client/api-server-selector/commit/97340e32cb15e01d67fa2649c6ec24aa38f73747) by Leandro Bauret
+* set input and dropdown with to 100% - margins [4efd4f0](https://github.com/advanced-rest-client/api-server-selector/commit/4efd4f0f2fa7c01c5f5c208fa9518d2ea5c2f19c) by Leandro Bauret
+* remove duplicated value in event [ea39e3c](https://github.com/advanced-rest-client/api-server-selector/commit/ea39e3c6ccd413b09536e89c12add809ec0db633) by Francisco Di Giandomenico
+* this.servers return [] by default [1ddae01](https://github.com/advanced-rest-client/api-server-selector/commit/1ddae01a109d4b3fbb6b5147275b460d47e13842) by Francisco Di Giandomenico
+* fixing refactoring [552214b](https://github.com/advanced-rest-client/api-server-selector/commit/552214bdb1c42330f21ce9a736cce35ea5ff8438) by Pawel Psztyc
+
+
+### Refactor
+
+* removing `amf` setter to use `__amfChanged` callback [e051afa](https://github.com/advanced-rest-client/api-server-selector/commit/e051afa41f730bd0acf10105670fda94635aa103) by Pawel
+* renaming event handler function [cfac345](https://github.com/advanced-rest-client/api-server-selector/commit/cfac345aa5547810ab4e543fc611b1d39e1bf350) by Pawel Psztyc
+* refactoring methods and optimisation [bb1953b](https://github.com/advanced-rest-client/api-server-selector/commit/bb1953b80329a820ec2643402bfb5e962db7c36a) by Pawel Psztyc
+
+
+### Testing
+
+* add tests [79fbadb](https://github.com/advanced-rest-client/api-server-selector/commit/79fbadbf2d5a8169cb5e4228762eb1f0d748b8a1) by Francisco Di Giandomenico
+
+
