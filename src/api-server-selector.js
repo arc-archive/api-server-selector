@@ -104,6 +104,12 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
        * of servers when selection is missing.
        */
       autoSelect: { type: Boolean },
+
+      /**
+       * A programmatic access to the opened state of the drop down.
+       * Note, this does nothing when custom element is rendered.
+       */
+      opened: { type: Boolean }
     };
   }
 
@@ -294,6 +300,7 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
     this._handleNavigationChange = this._handleNavigationChange.bind(this);
     this._customNodesCount = 0;
     this.value = '';
+    this.opened = false;
   }
 
   firstUpdated() {
@@ -524,6 +531,15 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
     return this._getValue(server, key);
   }
 
+  /**
+   * Handler for the drop down's `opened-changed` event. It sets local value
+   * for the opened flag.
+   * @param {CustomEvent} e
+   */
+  _openedHandler(e) {
+    this.opened = e.detail.value;
+  }
+
   render() {
     const { styles, isCustom } = this;
     return html`
@@ -562,12 +578,14 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
    * @return {TemplateResult} Template result for the drop down element.
    */
   _renderDropdown() {
-    const { compatibility, outlined, value } = this;
+    const { compatibility, outlined, value, opened } = this;
     return html`
     <anypoint-dropdown-menu
       class="api-server-dropdown"
       ?compatibility="${compatibility}"
       ?outlined="${outlined}"
+      .opened="${opened}"
+      @opened-changed="${this._openedHandler}"
     >
       <label slot="label">Select server</label>
       <anypoint-listbox

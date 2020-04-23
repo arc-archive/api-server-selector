@@ -264,6 +264,41 @@ describe('<api-server-selector>', () => {
     })
   });
 
+  describe('#opened', () => {
+    let element;
+    beforeEach(async () => {
+      element = await extraOptionsFixture();
+    });
+
+    it('opened is false by default', async () => {
+      assert.isFalse(element.opened);
+    });
+
+    it('sets #opened to true when drop down is opened', async () => {
+      const node = element.shadowRoot.querySelector('anypoint-dropdown-menu');
+      node.opened = true;
+      await nextFrame();
+
+      assert.isTrue(element.opened);
+    });
+
+    it('opens the dropdown when the property is set', async () => {
+      element.opened = true;
+      await nextFrame();
+      const node = element.shadowRoot.querySelector('anypoint-dropdown-menu');
+      assert.isTrue(node.opened);
+    });
+
+    it('closes the dropdown when the property is set', async () => {
+      element.opened = true;
+      await nextFrame();
+      element.opened = false;
+      await nextFrame();
+      const node = element.shadowRoot.querySelector('anypoint-dropdown-menu');
+      assert.isFalse(node.opened);
+    });
+  });
+
   [
     ['Compact model', true],
     ['Regular model', false]

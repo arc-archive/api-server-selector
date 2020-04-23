@@ -55,12 +55,12 @@ declare class ApiServerSelector extends
   readonly _listItems: Array<Element|null>|null;
 
   /**
-   * Holds the current servers to show in in the dropdown menu
+   * The current list of servers to render
    */
   servers: any[]|null|undefined;
 
   /**
-   * If activated, `Custom base URI` will be in the dropdown options
+   * When set the `Custom base URI` is rendered in the dropdown
    */
   allowCustom: boolean|null|undefined;
 
@@ -71,7 +71,6 @@ declare class ApiServerSelector extends
 
   /**
    * Current value of the server
-   * Always a URI value
    */
   value: String|null;
   readonly isCustom: Boolean|null;
@@ -80,7 +79,7 @@ declare class ApiServerSelector extends
   readonly _serversCount: Number|null;
 
   /**
-   * Currently selected type of an base URI.
+   * Currently selected type of the input.
    * `server` | `uri` | `custom`
    */
   type: string|null|undefined;
@@ -105,6 +104,12 @@ declare class ApiServerSelector extends
    * of servers when selection is missing.
    */
   autoSelect: boolean|null|undefined;
+
+  /**
+   * A programmatic access to the opened state of the drop down.
+   * Note, this does nothing when custom element is rendered.
+   */
+  opened: boolean|null|undefined;
   constructor();
   firstUpdated(): void;
   render(): any;
@@ -200,6 +205,12 @@ declare class ApiServerSelector extends
    * @returns Server base URI.
    */
   _getServerUri(server: object|null): String|null;
+
+  /**
+   * Handler for the drop down's `opened-changed` event. It sets local value
+   * for the opened flag.
+   */
+  _openedHandler(e: CustomEvent|null): void;
 
   /**
    * @returns Template result for the custom input.

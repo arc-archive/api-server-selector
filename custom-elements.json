@@ -45,6 +45,11 @@
           "name": "autoSelect",
           "type": "Booelan",
           "description": "When set it automaticallt selected the first server from the list of servers when selection is missing."
+        },
+        {
+          "name": "opened",
+          "type": "Booelan",
+          "description": "A programmatic access to the opened state of the drop down.\nNote, this does nothing when custom element is rendered."
         }
       ],
       "events": [
