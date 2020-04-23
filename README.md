@@ -42,7 +42,7 @@ import '@api-components/api-server-selector/api-server-selector.js';
 class SampleElement extends LitElement {
   render() {
     return html`
-    <api-server-selector amf="${this.model}"></api-server-selector>
+    <api-server-selector .amf="${this.model}"></api-server-selector>
     `;
   }
 }
@@ -51,14 +51,16 @@ customElements.define('sample-element', SampleElement);
 
 ### Subscribing to change events
 
-The component dispatches the `api-server-changed` custom event when the server selection changes.
+#### apiserverchanged event
+
+The component dispatches the `apiserverchanged` custom event when the server selection changes.
 
 ```js
-element.addEventListener('api-server-changed', function(e) {
-    const { selectedValue, selectedType } = e.detail;
-    // selectedValue is the selected base URI
-    // selectedType tells whether it's a server defined value of a custom property
-    // This is also the same as const { selectedValue, selectedType } = e.target;
+element.addEventListener('apiserverchanged', function(e) {
+    const { value, type } = e.detail;
+    // value is the selected base URI
+    // type tells whether it's a server defined value of a custom property
+    // This is also the same as const { value, type } = e.target;
 });
 ```
 
@@ -68,6 +70,23 @@ Additionally the element supports `onapiserverchange` setter for event callback 
 
 ```javascript
 element.onapiserverchange = (e) => {
+  // ...
+};
+```
+
+#### serverscountchanged event
+
+The event is dispatched when a number of rendered servers changed.
+
+```javascript
+element.addEventListener('serverscountchanged', function(e) {
+    const { value } = e.detail;
+    // value is the number of rendered servers
+});
+```
+
+```javascript
+element.onserverscountchange = (e) => {
   // ...
 };
 ```
