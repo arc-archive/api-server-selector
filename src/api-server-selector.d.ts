@@ -51,8 +51,15 @@ declare class ApiServerSelector extends
   AmfHelperMixin(
   EventTargetMixin(
   LitElement)) {
+
+  /**
+   * A list of custom items rendered in the slot.
+   * This property is received from the list box that mixes in `AnypointSelectableMixin`
+   * that dispatches `items-changed` event when rendered items change.
+   */
+  _customItems: Array<String|null>|null;
   readonly styles: any;
-  readonly _listItems: Array<Element|null>|null;
+  readonly _serverValues: Array<String|null>|null;
 
   /**
    * The current list of servers to render
@@ -74,6 +81,11 @@ declare class ApiServerSelector extends
    */
   value: String|null;
   readonly isCustom: Boolean|null;
+
+  /**
+   * Checks whether the current value is a custom value related to current list of servers.
+   */
+  readonly isValueCustom: Boolean|null;
   onapiserverchange: EventListenerObject|null;
   onserverscountchange: EventListenerObject|null;
   readonly _serversCount: Number|null;
@@ -211,6 +223,11 @@ declare class ApiServerSelector extends
    * for the opened flag.
    */
   _openedHandler(e: CustomEvent|null): void;
+
+  /**
+   * Updates list of custom items rendered in the selector.
+   */
+  _listboxItemsHandler(e: CustomEvent|null): void;
 
   /**
    * @returns Template result for the custom input.

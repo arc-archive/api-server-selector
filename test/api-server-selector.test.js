@@ -31,6 +31,7 @@ describe('<api-server-selector>', () => {
         </anypoint-item>
     </api-server-selector>`));
   }
+
   async function slotChangeFixture() {
     return (await fixture(`
       <api-server-selector>
@@ -87,6 +88,18 @@ describe('<api-server-selector>', () => {
       </anypoint-item>
       </api-server-selector>
     `));
+  }
+
+  async function extraOptionsCustomFixture(amf) {
+    return (await fixture(html`
+      <api-server-selector .amf="${amf}" allowCustom>
+        <anypoint-item slot="custom-base-uri" value="http://customServer.com">
+          http://customServer.com
+        </anypoint-item>
+        <anypoint-item slot="custom-base-uri" value="http://customServer2.com">
+          http://customServer2.com
+        </anypoint-item>
+    </api-server-selector>`));
   }
 
   describe('basic usage', () => {
@@ -630,6 +643,163 @@ describe('<api-server-selector>', () => {
           node.click();
 
           assert.equal(element.value, '');
+        });
+      });
+
+      describe('#_serverValues', () => {
+        let amf;
+
+        const serverValues = [
+          'https://{customerId}.saas-app.com:{port}/v2',
+          'https://{region}.api.cognitive.microsoft.com',
+          'https://api.openweathermap.org/data/2.5/',
+          'http://beta.api.openweathermap.org/data/2.5/'
+        ];
+        const customValues = [
+          'http://customServer.com',
+          'http://customServer2.com'
+        ];
+
+        before(async () => {
+          amf = await AmfLoader.load(compact);
+        });
+
+        it('returns values from servers', async () => {
+          const element = await basicFixture(amf);
+          const result = element._serverValues;
+          assert.deepEqual(result, serverValues);
+        });
+
+        it('returns values from custom servers', async () => {
+          const element = await extraOptionsFixture();
+          const result = element._serverValues;
+          assert.deepEqual(result, customValues);
+        });
+
+        it('returns values from servers and custom servers', async () => {
+          const element = await extraOptionsFixture(amf);
+          const result = element._serverValues;
+          assert.deepEqual(result, serverValues.concat(customValues));
+        });
+      });
+
+      describe('#isValueCustom', () => {
+        let amf;
+
+        before(async () => {
+          amf = await AmfLoader.load(compact);
+        });
+
+        it('returns false when no value', async () => {
+          const element = await basicFixture(amf);
+          const result = element.isValueCustom;
+          assert.isFalse(result);
+        });
+
+        it('returns false when value is on the servers list', async () => {
+          const element = await basicFixture(amf);
+          element._value = 'https://{customerId}.saas-app.com:{port}/v2';
+          const result = element.isValueCustom;
+          assert.isFalse(result);
+        });
+
+        it('returns false when value is on the custom servers list', async () => {
+          const element = await extraOptionsFixture(amf);
+          element._value = 'http://customServer.com';
+          const result = element.isValueCustom;
+          assert.isFalse(result);
+        });
+
+        it('returns true when on either of lists', async () => {
+          const element = await extraOptionsFixture(amf);
+          element._value = 'http://mostCustomServer.com';
+          const result = element.isValueCustom;
+          assert.isTrue(result);
+        });
+      });
+
+      describe('#_customItems', () => {
+        let amf;
+
+        const customValues = [
+          'http://customServer.com',
+          'http://customServer2.com'
+        ];
+
+        before(async () => {
+          amf = await AmfLoader.load(compact);
+        });
+
+        it('is empty array by default', async () => {
+          const element = await basicFixture(amf);
+          const result = element._customItems;
+          assert.deepEqual(result, []);
+        });
+
+        it('adds custom items to the list', async () => {
+          const element = await slotChangeFixture();
+          const result = element._customItems;
+          assert.deepEqual(result, customValues);
+        });
+
+        it('updates a list when a child is removed', async () => {
+          const element = await slotChangeFixture();
+          const item = element.querySelector('anypoint-item');
+          element.removeChild(item);
+          await nextFrame();
+          const result = element._customItems;
+          assert.deepEqual(result, [customValues[1]]);
+        });
+
+        it('updatessets empty array when no items', async () => {
+          const element = await slotChangeFixture();
+          const items = element.querySelectorAll('anypoint-item');
+          Array.from(items).forEach((item) => element.removeChild(item));
+          await nextFrame();
+          const result = element._customItems;
+          assert.deepEqual(result, []);
+        });
+      });
+
+      describe('#value setter', () => {
+        let amf;
+
+        const serverValues = [
+          'https://{customerId}.saas-app.com:{port}/v2',
+          'https://{region}.api.cognitive.microsoft.com',
+          'https://api.openweathermap.org/data/2.5/',
+          'http://beta.api.openweathermap.org/data/2.5/'
+        ];
+        const customValues = [
+          'http://customServer.com',
+          'http://customServer2.com'
+        ];
+
+        before(async () => {
+          amf = await AmfLoader.load(compact);
+        });
+
+        it('selectes value from rendered servers', async () => {
+          const element = await basicFixture(amf);
+          element.value = serverValues[1];
+          await nextFrame();
+          const node = element.shadowRoot.querySelector('anypoint-listbox');
+          assert.equal(node.selected, serverValues[1]);
+        });
+
+        it('selectes value from rendered custom servers', async () => {
+          const element = await extraOptionsFixture(amf);
+          element.value = customValues[1];
+          await nextFrame();
+          const node = element.shadowRoot.querySelector('anypoint-listbox');
+          assert.equal(node.selected, customValues[1]);
+        });
+
+        it('opens custom editr when value is custom', async () => {
+          const element = await extraOptionsCustomFixture(amf);
+          element.value = 'super-custom';
+          await nextFrame();
+          assert.isTrue(element.isCustom);
         });
       });
     });

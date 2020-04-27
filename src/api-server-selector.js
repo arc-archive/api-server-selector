@@ -109,7 +109,7 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
        * A programmatic access to the opened state of the drop down.
        * Note, this does nothing when custom element is rendered.
        */
-      opened: { type: Boolean }
+      opened: { type: Boolean },
     };
   }
 
@@ -118,11 +118,12 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
   }
 
   /**
-   * @return {Array<Element>} List of rendered items in the drop down.
+   * @return {Array<String>} Computed list of all URI values from both the servers
+   * and the list of rendered custom items.
    */
-  get _listItems() {
-    const node = /** @type {any} */ (this.shadowRoot.querySelector('anypoint-listbox'));
-    return node ? node.items : [];
+  get _serverValues() {
+    const result = (this.servers || []).map((item) => this._getServerUri(item));
+    return result.concat(this._customItems || []);
   }
 
   /**
@@ -234,6 +235,23 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
   }
 
   /**
+   * Checks whether the current value is a custom value related to current list of servers.
+   * @return {Boolean} True if the value is not one of the server values or custom
+   * servers.
+   */
+  get isValueCustom() {
+    const { servers = [], value } = this;
+    if (!value) {
+      return false;
+    }
+    const srv = this._getServerIndexByUri(servers, value);
+    if (srv !== -1) {
+      return false;
+    }
+    return this._serverValues.indexOf(value) === -1;
+  }
+
+  /**
    * @return {EventListenerObject|null} Previously registed callback function for
    * the `api-server-changed` event.
    */
@@ -301,6 +319,14 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
     this._customNodesCount = 0;
     this.value = '';
     this.opened = false;
+
+    /**
+     * A list of custom items rendered in the slot.
+     * This property is received from the list box that mixes in `AnypointSelectableMixin`
+     * that dispatches `items-changed` event when rendered items change.
+     * @type {Array<String>}
+     */
+    this._customItems = [];
   }
 
   firstUpdated() {
@@ -353,11 +379,10 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
    * When there's already valid selection then it does nothing.
    */
   selectIfNeeded() {
-    const { value, isCustom, autoSelect } = this;
-    if (isCustom || !autoSelect) {
+    if (!this.autoSelect || this.isValueCustom) {
       return;
     }
-    if (!value) {
+    if (!this.value) {
       const srv = this.servers[0];
       if (!srv) {
         return;
@@ -387,22 +412,16 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
       // When a value is cleared it is always a server
       return result;
     }
-    const items = this._listItems;
-    const node = items.find((node) => node.getAttribute('value') === value);
-    if (!node) {
+    const values = this._serverValues;
+    const index = values.indexOf(value);
+    if (index === -1) {
       // no node in the dropdown with this value. Render custom input
       result.type = 'custom';
       return result;
     }
-    // selection of the custom list item
-    if (value === 'custom') {
-      result.value = '';
-      result.type = 'custom';
-      return result;
-    }
-    // detecting the type of selection.
-    const slot = node.getAttribute('slot');
-    const isSlotted = slot === 'custom-base-uri';
+    const itemValue = values[index];
+    const custom = this._customItems || [];
+    const isSlotted = custom.indexOf(itemValue) !== -1;
     if (isSlotted) {
       result.type = 'uri';
     } else {
@@ -462,10 +481,10 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
   /**
    * Update component's servers.
    *
-   * @param {?Object} selectedNodeParams The currently selected node parameters to set the servers for
+   * @param {Object=} selectedNodeParams The currently selected node parameters to set the servers for
    * @param {String} selectedNodeParams.id The selected node ID where servers should be fetched
    * @param {String} selectedNodeParams.type The selected node type where servers should be fetched
-   * @param {?String} selectedNodeParams.endpointId Optional endpoint id the method id belongs to
+   * @param {String=} selectedNodeParams.endpointId Optional endpoint id the method id belongs to
    */
   updateServers({ id, type, endpointId } = {}) {
     let methodId;
@@ -487,7 +506,11 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
     if (!selectedItem) {
       return;
     }
-    const value = selectedItem.getAttribute('value');
+    let value = selectedItem.getAttribute('value');
+    if (value === 'custom') {
+      this.type = 'custom';
+      value = '';
+    }
     this.value = value;
   }
 
@@ -538,6 +561,31 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
    */
   _openedHandler(e) {
     this.opened = e.detail.value;
+  }
+
+  /**
+   * Updates list of custom items rendered in the selector.
+   * @param {CustomEvent} e
+   */
+  _listboxItemsHandler(e) {
+    const { value } = e.detail;
+    if (!Array.isArray(value) || !value.length) {
+      this._customItems = [];
+      return;
+    }
+    const result = [];
+    value.forEach((node) => {
+      const slot = node.getAttribute('slot');
+      if (slot !== 'custom-base-uri') {
+        return;
+      }
+      const value = node.getAttribute('value');
+      if (!value) {
+        return;
+      }
+      result.push(value);
+    });
+    this._customItems = result;
   }
 
   render() {
@@ -597,6 +645,7 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
         ?outlined="${outlined}"
         attrforselected="value"
         selectable="[value]"
+        @items-changed="${this._listboxItemsHandler}"
       >
         ${this._renderItems()}
       </anypoint-listbox>

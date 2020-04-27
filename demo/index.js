@@ -14,6 +14,7 @@ class DemoPage extends ApiDemoPage {
       'renderCustom',
       'servers',
       'selectedServer',
+      'selectedType',
       'allowCustom',
       'serversCount',
       'autoSelect',
@@ -23,8 +24,8 @@ class DemoPage extends ApiDemoPage {
     this.darkThemeActive = false;
     this.demoStates = ['Filled', 'Outlined', 'Anypoint'];
     this.renderCustom = false;
-    this.allowCustom = false;
-    this.autoSelect = false;
+    this.allowCustom = true;
+    this.autoSelect = true;
     this._apiSrvHandler = this._apiSrvHandler.bind(this);
     this._countHandler = this._countHandler.bind(this);
   }
@@ -67,6 +68,7 @@ class DemoPage extends ApiDemoPage {
   _apiSrvHandler(e) {
     const { value, type } = e.detail;
     this.selectedServer = value;
+    this.selectedType = type;
     console.log('Selection changed', value, type);
   }
 
@@ -85,6 +87,7 @@ class DemoPage extends ApiDemoPage {
       servers,
       allowCustom,
       selectedServer,
+      selectedType,
       serversCount,
       autoSelect,
     } = this;
@@ -110,6 +113,8 @@ class DemoPage extends ApiDemoPage {
               ?outlined="${outlined}"
               ?autoSelect="${autoSelect}"
               .servers="${servers}"
+              .selected="${selectedServer}"
+              .type="${selectedType}"
               @apiserverchanged="${this._apiSrvHandler}"
               @serverscountchanged="${this._countHandler}"
             >
@@ -128,6 +133,7 @@ class DemoPage extends ApiDemoPage {
             aria-describedby="mainOptionsLabel"
             slot="options"
             name="allowCustom"
+            checked
             @change="${this._toggleMainOption}"
             >Allow Custom</anypoint-checkbox
           >
@@ -135,6 +141,7 @@ class DemoPage extends ApiDemoPage {
             aria-describedby="mainOptionsLabel"
             slot="options"
             name="autoSelect"
+            checked
             @change="${this._toggleMainOption}"
             >Auto select server</anypoint-checkbox
           >
