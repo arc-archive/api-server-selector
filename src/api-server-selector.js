@@ -358,7 +358,7 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
    * It sets `_customNodesCount` property with the number of properties
    * and notifies the change.
    */
-  customServerChangeHandler() {
+  _customServerChangeHandler() {
     const nodes = this._getCustomServers();
     this._customNodesCount = nodes.length;
     this._notifyServersCount();
@@ -715,7 +715,7 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
 
   _renderCustomSlotTop() {
     return html`<slot
-      @slotchange="${this.customServerChangeHandler}"
+      @slotchange="${this._customServerChangeHandler}"
       name="custom-base-uri-top"
     ></slot>`;
   }
@@ -725,7 +725,7 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
    */
   _renderCustomSlot() {
     return html`<slot
-      @slotchange="${this.customServerChangeHandler}"
+      @slotchange="${this._customServerChangeHandler}"
       name="custom-base-uri"
     ></slot>`;
   }
