@@ -673,9 +673,9 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
    */
   _renderItems() {
     return html`
-      ${this._renderExtraSlotsTop()}
+      ${this._renderCustomSlotTop()}
       ${this._renderServerOptions()}
-      ${this._renderExtraSlot()}
+      ${this._renderCustomSlot()}
       ${this._renderCustomURIOption()}
     `;
   }
@@ -713,7 +713,7 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
   }
 
 
-  _renderExtraSlotsTop() {
+  _renderCustomSlotTop() {
     return html`<slot
       @slotchange="${this.customServerChangeHandler}"
       name="custom-base-uri-top"
@@ -723,7 +723,7 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
   /**
    * @return {TemplateResult} Template result for the `slot` element
    */
-  _renderExtraSlot() {
+  _renderCustomSlot() {
     return html`<slot
       @slotchange="${this.customServerChangeHandler}"
       name="custom-base-uri"

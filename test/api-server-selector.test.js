@@ -29,6 +29,9 @@ describe('<api-server-selector>', () => {
         <anypoint-item slot="custom-base-uri" value="http://customServer2.com">
           http://customServer2.com
         </anypoint-item>
+        <anypoint-item slot="custom-base-uri-top" value="http://customServer3.com">
+          http://customServer3.com
+        </anypoint-item>
     </api-server-selector>`));
   }
 
@@ -37,6 +40,9 @@ describe('<api-server-selector>', () => {
       <api-server-selector>
         <anypoint-item slot="custom-base-uri" value="http://customServer.com">
           http://customServer.com
+        </anypoint-item>
+        <anypoint-item slot="custom-base-uri-top" value="http://customServer4.com">
+          http://customServer4.com
         </anypoint-item>
         <anypoint-item slot="custom-base-uri" value="http://customServer2.com">
           http://customServer2.com
@@ -243,19 +249,25 @@ describe('<api-server-selector>', () => {
       assert.lengthOf(nodes, 2);
     });
 
-    it('has a total of 2 servers', async () => {
+    it('has 1 assigned node to the top slot', async () => {
       const element = await extraOptionsFixture();
-      assert.equal(element._serversCount, 2)
+      const nodes = element.shadowRoot.querySelector('slot[name="custom-base-uri-top"]').assignedElements();
+      assert.lengthOf(nodes, 1);
     });
 
-    it('renders 2 servers', async () => {
+    it('has a total of 3 servers', async () => {
+      const element = await extraOptionsFixture();
+      assert.equal(element._serversCount, 3)
+    });
+
+    it('renders 3 servers', async () => {
       const element = await slotChangeFixture();
-      assert.equal(element._serversCount, 2);
+      assert.equal(element._serversCount, 3);
     })
 
     it('dispatches serverscountchanged event when a slot is added', async () => {
       const element = await slotChangeFixture();
-      const toBeSlotted = element.children[2];
+      const toBeSlotted = element.children[3];
       const spy = sinon.spy();
       element.addEventListener('serverscountchanged', spy);
       toBeSlotted.setAttribute('slot', 'custom-base-uri');
@@ -264,16 +276,16 @@ describe('<api-server-selector>', () => {
       assert.isTrue(spy.called, 'event is dispatched');
       const { detail } = spy.args[0][0];
       assert.deepEqual(detail, {
-        value: 3
+        value: 4
       });
     })
 
-    it('renders 3 servers after the update', async () => {
+    it('renders 4 servers after the update', async () => {
       const element = await slotChangeFixture();
-      const toBeSlotted = element.children[2];
+      const toBeSlotted = element.children[3];
       toBeSlotted.setAttribute('slot', 'custom-base-uri');
       await nextFrame();
-      assert.equal(element._serversCount, 3);
+      assert.equal(element._serversCount, 4);
     })
   });
 
@@ -646,7 +658,7 @@ describe('<api-server-selector>', () => {
         });
       });
 
-      describe.only('#_serverValues', () => {
+      describe('#_serverValues', () => {
         let amf;
 
         const serverValues = [
@@ -656,6 +668,7 @@ describe('<api-server-selector>', () => {
           'http://beta.api.openweathermap.org/data/2.5/'
         ];
         const customValues = [
+          'http://customServer3.com',
           'http://customServer.com',
           'http://customServer2.com'
         ];
@@ -670,7 +683,7 @@ describe('<api-server-selector>', () => {
           assert.deepEqual(result, serverValues);
         });
 
-        it.only('returns values from custom servers', async () => {
+        it('returns values from custom servers', async () => {
           const element = await extraOptionsFixture();
           const result = element._serverValues;
           assert.deepEqual(result, customValues);
@@ -722,6 +735,7 @@ describe('<api-server-selector>', () => {
         let amf;
 
         const customValues = [
+          'http://customServer4.com',
           'http://customServer.com',
           'http://customServer2.com'
         ];
@@ -748,7 +762,7 @@ describe('<api-server-selector>', () => {
           element.removeChild(item);
           await nextFrame();
           const result = element._customItems;
-          assert.deepEqual(result, [customValues[1]]);
+          assert.deepEqual(result, [customValues[0], customValues[2]]);
         });
 
         it('updatessets empty array when no items', async () => {
