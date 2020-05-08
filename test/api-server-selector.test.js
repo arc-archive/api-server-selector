@@ -646,7 +646,7 @@ describe('<api-server-selector>', () => {
         });
       });
 
-      describe('#_serverValues', () => {
+      describe.only('#_serverValues', () => {
         let amf;
 
         const serverValues = [
@@ -670,7 +670,7 @@ describe('<api-server-selector>', () => {
           assert.deepEqual(result, serverValues);
         });
 
-        it('returns values from custom servers', async () => {
+        it.only('returns values from custom servers', async () => {
           const element = await extraOptionsFixture();
           const result = element._serverValues;
           assert.deepEqual(result, customValues);

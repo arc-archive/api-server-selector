@@ -168,7 +168,7 @@ class DemoPage extends ApiDemoPage {
       Mocking service
     </anypoint-item>
     <anypoint-item
-      slot="custom-base-uri"
+      slot="custom-base-uri-main"
       value="http://customServer2.com"
       ?compatibility="${compatibility}"
     >

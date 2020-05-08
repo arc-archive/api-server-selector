@@ -43,6 +43,8 @@ const serverCountEventType = 'serverscountchanged';
  * This component renders a `slot` element to render anything the users wants
  * to add in there. To enable this, sit the `extraOptions` value in this component
  * to true, and render an element associated to the slot name `custom-base-uri`.
+ * If it is necessary to show custom content before the model servers, the `custom-base-uri-top`
+ * slot should be used
  * The items rendered in this slot should be `anypoint-item` components, and have a
  * `value` attribute. This is the value that will be dispatched in the `api-server-changed`
  * event.
@@ -353,11 +355,11 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
 
   /**
    * A handler called when slotted number of children change.
-   * It sets `_customNodesCount` proeprty with the number of properties
+   * It sets `_customNodesCount` property with the number of properties
    * and notifies the change.
    */
-  _childrenHandler() {
-    const nodes = this._getExtraServers();
+  customServerChangeHandler() {
+    const nodes = this._getCustomServers();
     this._customNodesCount = nodes.length;
     this._notifyServersCount();
   }
@@ -520,10 +522,20 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
    *
    * @return {Array<Element>} Elements assigned to custom-base-uri slot
    */
-  _getExtraServers() {
-    const slot = this.shadowRoot.querySelector('slot');
-    const items = slot ? ( /** @type HTMLSlotElement */ (slot)).assignedElements({ flatten: true }) : [];
-    return items.filter((elm) => elm.hasAttribute('value'));
+  _getCustomServers() {
+    const slotList = this.shadowRoot.querySelectorAll(
+      'slot[name="custom-base-uri"], slot[name="custom-base-uri-top"]'
+    );
+
+    let allCustomServers = [];
+
+    slotList.forEach((slot) => {
+      const slotServers = ( /** @type HTMLSlotElement */ (slot)).assignedElements({ flatten: true });
+
+      allCustomServers = allCustomServers.concat(slotServers);
+    });
+
+    return allCustomServers.filter((elm) => elm.hasAttribute('value'));
   }
 
   /**
@@ -576,7 +588,7 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
     const result = [];
     value.forEach((node) => {
       const slot = node.getAttribute('slot');
-      if (slot !== 'custom-base-uri') {
+      if (slot !== 'custom-base-uri' && slot !== 'custom-base-uri-top') {
         return;
       }
       const value = node.getAttribute('value');
@@ -661,6 +673,7 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
    */
   _renderItems() {
     return html`
+      ${this._renderExtraSlotsTop()}
       ${this._renderServerOptions()}
       ${this._renderExtraSlot()}
       ${this._renderCustomURIOption()}
@@ -699,12 +712,20 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
     return servers ? servers.map(toAnypointItem) : [];
   }
 
+
+  _renderExtraSlotsTop() {
+    return html`<slot
+      @slotchange="${this.customServerChangeHandler}"
+      name="custom-base-uri-top"
+    ></slot>`;
+  }
+
   /**
    * @return {TemplateResult} Template result for the `slot` element
    */
   _renderExtraSlot() {
     return html`<slot
-      @slotchange="${this._childrenHandler}"
+      @slotchange="${this.customServerChangeHandler}"
       name="custom-base-uri"
     ></slot>`;
   }
