@@ -32,6 +32,19 @@ describe('<api-server-selector>', () => {
     </api-server-selector>`));
   }
 
+  async function outerExtraOptionsFixture(amf) {
+    return (await fixture(html`
+      <anypoint-item slot="custom-base-uri" value="http://customServer.com">
+          http://customServer.com
+        </anypoint-item>
+        <anypoint-item slot="custom-base-uri" value="http://customServer2.com">
+          http://customServer2.com
+        </anypoint-item>
+      <api-server-selector .amf="${amf}">
+        <slot name="custom-base-uri" slot="custom-base-uri"></slot>
+      </api-server-selector>`));
+  }
+
   async function slotChangeFixture() {
     return (await fixture(`
       <api-server-selector>
@@ -164,6 +177,11 @@ describe('<api-server-selector>', () => {
       assert.equal(element.value, 'https://www.google.com');
       assert.equal(element.type, 'custom');
       assert.equal(element.baseUri, 'https://www.google.com');
+    });
+
+    it('has extra slots when slots are outside', async () => {
+      const element = await outerExtraOptionsFixture();
+      assert.equal(element._customNodesCount, 2);
     });
   });
 
