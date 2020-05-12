@@ -179,7 +179,7 @@ describe('<api-server-selector>', () => {
       assert.equal(element.baseUri, 'https://www.google.com');
     });
 
-    it('has extra slots when slots are outside', async () => {
+    it('has extra slots rendered from outside', async () => {
       const element = await outerExtraOptionsFixture();
       assert.equal(element._customNodesCount, 2);
     });
