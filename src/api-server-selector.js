@@ -66,7 +66,7 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
       /**
        * When set the `Custom base URI` is rendered in the dropdown
        */
-      allowCustom: { type: Boolean, reflect: true  },
+      allowCustom: { type: Boolean, reflect: true },
 
       /**
        * The current list of servers to render
@@ -376,6 +376,8 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
    * Executes auto selection logic.
    * It selectes a fist available sever from the serves list when AMF or operation
    * selection changed.
+   * If there are no servers, but there are custom slots available, then select
+   * first custom slot
    * When there's already valid selection then it does nothing.
    */
   selectIfNeeded() {
@@ -383,11 +385,17 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
       return;
     }
     if (!this.value) {
-      const srv = this.servers[0];
-      if (!srv) {
-        return;
+      let srv = this.servers[0];
+      if (srv) {
+        this.value = this._getServerUri(srv);
+      } else {
+        srv = this._getExtraServers()[0];
+        if (srv) {
+          this.type = 'custom';
+          this.value = srv.getAttribute('value');
+        }
       }
-      this.value = this._getServerUri(srv);
+
     }
   }
 

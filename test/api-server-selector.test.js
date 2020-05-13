@@ -102,6 +102,18 @@ describe('<api-server-selector>', () => {
     </api-server-selector>`));
   }
 
+  async function autoSelectFixtureWithSlots(amf) {
+    return await fixture(html`
+      <api-server-selector .amf="${amf}" allowCustom autoSelect>
+        <anypoint-item slot="custom-base-uri" value="http://customServer.com">
+          http://customServer.com
+        </anypoint-item>
+        <anypoint-item slot="custom-base-uri" value="http://customServer2.com">
+          http://customServer2.com
+        </anypoint-item>
+    </api-server-selector>`);
+  }
+
   describe('basic usage', () => {
     it('renders empty dropdown', async () => {
       const element = await basicFixture();
@@ -622,6 +634,31 @@ describe('<api-server-selector>', () => {
           });
           await nextFrame();
           assert.equal(element.value, 'http://beta.api.openweathermap.org/data/2.5/');
+        });
+
+        describe('no servers in model', () => {
+          before(async () => {
+            amf = await AmfLoader.load(compact, 'no-servers-api');
+          });
+
+          after(async () => {
+            amf = await AmfLoader.load(compact);
+          });
+
+          it('selects first slot element if there are no model servers', async () => {
+            const element = await autoSelectFixtureWithSlots(amf);
+            assert.equal(element.value, 'http://customServer.com');
+            assert.equal(element.type, 'custom');
+          });
+
+          it('dispatches slot selection event if there are no model servers', async () => {
+            let detail;
+            addEventListener('apiserverchanged', e => detail = e.detail);
+            await autoSelectFixtureWithSlots(amf);
+            assert.isDefined(detail);
+            assert.equal(detail.value, 'http://customServer.com');
+            assert.equal(detail.type, 'custom');
+          });
         });
       });
 
