@@ -188,6 +188,15 @@ class DemoPage extends ApiDemoPage {
       ${this._demoTemplate()}
     `;
   }
+
+  _apiListTemplate() {
+    return [
+      ['demo-api', 'Demo API'],
+      ['no-servers-api', 'No Servers API'],
+    ].map(([file, label]) => html`
+      <anypoint-item data-src="${file}-compact.json">${label} - compact model</anypoint-item>
+      `);
+  }
 }
 
 const instance = new DemoPage();

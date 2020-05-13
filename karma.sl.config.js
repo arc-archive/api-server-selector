@@ -10,7 +10,7 @@ module.exports = (config) => {
     },
     client: {
       mocha: {
-        timeout: 10000
+        timeout: 15000
       }
     }
   });

@@ -1,3 +1,4 @@
 {
-  "demo-api/demo-api.yaml": {"type": "OAS 3.0", "mime": "application/yaml"}
+  "demo-api/demo-api.yaml": {"type": "OAS 3.0", "mime": "application/yaml"},
+  "no-servers-api/no-servers-api.yaml": {"type": "OAS 3.0", "mime": "application/yaml"}
 }
