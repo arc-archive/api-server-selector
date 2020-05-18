@@ -648,7 +648,7 @@ describe('<api-server-selector>', () => {
           it('selects first slot element if there are no model servers', async () => {
             const element = await autoSelectFixtureWithSlots(amf);
             assert.equal(element.value, 'http://customServer.com');
-            assert.equal(element.type, 'custom');
+            assert.equal(element.type, 'uri');
           });
 
           it('dispatches slot selection event if there are no model servers', async () => {
@@ -657,7 +657,7 @@ describe('<api-server-selector>', () => {
             await autoSelectFixtureWithSlots(amf);
             assert.isDefined(detail);
             assert.equal(detail.value, 'http://customServer.com');
-            assert.equal(detail.type, 'custom');
+            assert.equal(detail.type, 'uri');
           });
         });
       });
