@@ -391,7 +391,7 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
       } else {
         srv = this._getExtraServers()[0];
         if (srv && this.amf) {
-          this.type = 'custom';
+          this.type = 'uri';
           this.value = srv.getAttribute('value');
         }
       }
