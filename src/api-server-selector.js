@@ -110,6 +110,11 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
        * Note, this does nothing when custom element is rendered.
        */
       opened: { type: Boolean },
+
+      /**
+       *
+       */
+      selectedValue: { type: String },
     };
   }
 
@@ -370,6 +375,16 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
     this.updateServers();
     await this.updateComplete;
     this.selectIfNeeded();
+  }
+
+  set selectedValue(value) {
+    const old = this._selectedValue;
+    if (old === value) {
+      return;
+    }
+    this._selectedValue = value;
+    this.updateServers({ id: value, type: 'method' });
+    this.requestUpdate('baseUri', old);
   }
 
   /**
