@@ -384,7 +384,7 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
     }
     this._selectedValue = value;
     this.updateServers({ id: value, type: 'method' });
-    this.requestUpdate('baseUri', old);
+    this.requestUpdate('selectedValue', old);
   }
 
   /**
