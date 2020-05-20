@@ -1,6 +1,5 @@
 import { html, LitElement } from 'lit-element';
 import { AmfHelperMixin } from '@api-components/amf-helper-mixin/amf-helper-mixin.js';
-import { EventsTargetMixin } from '@advanced-rest-client/events-target-mixin/events-target-mixin.js';
 import '@anypoint-web-components/anypoint-input/anypoint-input.js';
 import '@anypoint-web-components/anypoint-dropdown-menu/anypoint-dropdown-menu.js';
 import '@anypoint-web-components/anypoint-listbox/anypoint-listbox.js';
@@ -54,7 +53,7 @@ const serverCountEventType = 'serverscountchanged';
  * @mixes EventTargetMixin
  * @extends LitElement
  */
-export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitElement)) {
+export class ApiServerSelector extends AmfHelperMixin(LitElement) {
   static get properties() {
     return {
       /**
