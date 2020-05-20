@@ -25,9 +25,8 @@ const serverCountEventType = 'serverscountchanged';
  * An element to generate view model for server
  * elements from AMF model
  *
- * This component receives an AMF model, and listens
- * to navigation events to know which node's servers
- * it should render.
+ * This component receives an AMF model, and selected node's id and type
+ * to know which servers to render
  *
  * When the selected server changes, it dispatches an `api-server-changed`
  * event, with the following details:
@@ -395,7 +394,6 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
 
   constructor() {
     super();
-    this._handleNavigationChange = this._handleNavigationChange.bind(this);
     this._customNodesCount = 0;
     this.value = '';
     this.opened = false;
@@ -411,16 +409,6 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
 
   firstUpdated() {
     this._notifyServersCount();
-  }
-
-  _attachListeners(node) {
-    super._attachListeners(node);
-    node.addEventListener('api-navigation-selection-changed', this._handleNavigationChange);
-  }
-
-  _detachListeners(node) {
-    super._detachListeners(node);
-    node.removeEventListener('api-navigation-selection-changed', this._handleNavigationChange);
   }
 
   /**
@@ -455,7 +443,7 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
 
   /**
    * Executes auto selection logic.
-   * It selectes a fist available sever from the serves list when AMF or operation
+   * It selects a fist available sever from the serves list when AMF or operation
    * selection changed.
    * If there are no servers, but there are custom slots available, then select
    * first custom slot
@@ -517,23 +505,6 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
       result.type = 'server';
     }
     return result;
-  }
-
-  /**
-   * Handler for the `api-navigation-selection-changed` event.
-   * @param {CustomEvent} e
-   */
-  async _handleNavigationChange(e) {
-    const { selected, type, endpointId } = e.detail;
-    const serverDefinitionAllowedTypes = ['endpoint', 'method'];
-    if (serverDefinitionAllowedTypes.indexOf(type) === -1) {
-      return;
-    }
-    this.selectedShape = selected;
-    this.selectedShapeType = type;
-    this.updateServers({ id: selected, type, endpointId });
-    await this.updateComplete;
-    this.selectIfNeeded();
   }
 
   /**

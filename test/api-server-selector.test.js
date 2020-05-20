@@ -336,12 +336,9 @@ describe('<api-server-selector>', () => {
   ].forEach(([label, compact]) => {
     describe(`${label}`, () => {
 
-      function dispatchNavigate(detail) {
-        const e = new CustomEvent('api-navigation-selection-changed', {
-          bubbles: true,
-          detail
-        });
-        document.body.dispatchEvent(e);
+      function changeSelection(element, { selected, type }) {
+        element.selectedShape = selected;
+        element.selectedShapeType = type;
       }
 
       describe('_renderServerOptions()', () => {
@@ -372,7 +369,7 @@ describe('<api-server-selector>', () => {
             selected: endpointId,
             type: 'endpoint',
           };
-          dispatchNavigate(detail);
+          changeSelection(element, detail);
           await nextFrame();
           assert.lengthOf(element._renderServerOptions(), 1);
         });
@@ -387,7 +384,7 @@ describe('<api-server-selector>', () => {
             type: 'method',
             endpointId,
           };
-          dispatchNavigate(detail);
+          changeSelection(element, detail);
           assert.lengthOf(element._renderServerOptions(), 2);
         });
       });
@@ -598,7 +595,7 @@ describe('<api-server-selector>', () => {
             selected: endpointId,
             type: 'endpoint',
           };
-          dispatchNavigate(detail);
+          changeSelection(element, detail);
           await nextFrame();
           assert.equal(element.value, 'https://endpoint.example.com');
         });
@@ -614,7 +611,7 @@ describe('<api-server-selector>', () => {
             type: 'method',
             endpointId,
           };
-          dispatchNavigate(detail);
+          changeSelection(element, detail);
           await nextFrame();
           assert.equal(element.value, 'https://echo.example.com');
         });
@@ -626,18 +623,20 @@ describe('<api-server-selector>', () => {
           const endpoint2 = AmfHelper.getEndpoint(element, amf, '/duplicated');
           const method2 = AmfHelper.getMethod(element, amf, '/duplicated', 'get');
 
-          dispatchNavigate({
+          const detail = {
             selected: method1['@id'],
             type: 'method',
             endpointId: endpoint1['@id'],
-          });
+          };
+          changeSelection(element, detail);
           element.value = 'http://beta.api.openweathermap.org/data/2.5/';
           await nextFrame();
-          dispatchNavigate({
+          const detail2 = {
             selected: method2['@id'],
             type: 'method',
             endpointId: endpoint2['@id'],
-          });
+          };
+          changeSelection(element, detail2);
           await nextFrame();
           assert.equal(element.value, 'http://beta.api.openweathermap.org/data/2.5/');
         });
@@ -885,7 +884,7 @@ describe('<api-server-selector>', () => {
             selected: id,
             type: 'endpoint'
           };
-          dispatchNavigate(detail);
+          changeSelection(element, detail);
           await nextFrame();
           assert.lengthOf(element.servers, 1);
         });
@@ -898,7 +897,7 @@ describe('<api-server-selector>', () => {
             selected: id,
             type: 'method'
           };
-          dispatchNavigate(detail);
+          changeSelection(element, detail);
           await nextFrame();
           assert.lengthOf(element.servers, 1);
         });
