@@ -112,9 +112,15 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
       opened: { type: Boolean },
 
       /**
-       *
+       * An `@id` of selected AMF shape.
+       * When changed, it computes servers for the selection
        */
-      selectedValue: { type: String },
+      selectedShape: { type: String },
+      /**
+       * The type of the selected AMF shape.
+       * When changed, it computes servers for the selection
+       */
+      selectedShapeType: { type: String },
     };
   }
 
@@ -318,6 +324,75 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
     return serversCount;
   }
 
+  /**
+   * Sets new selectedShape, then tries to update servers
+   * @param {String} value AMF shape id
+   */
+  set selectedShape(value) {
+    const old = this._selectedShape;
+    if (old === value) {
+      return;
+    }
+    this._selectedShape = value;
+    const type = this.selectedShapeType;
+    this._handleShapeChange(value, type);
+    this.requestUpdate('selectedShape', old);
+  }
+
+  get selectedShape() {
+    return this._selectedShape;
+  }
+
+  /**
+   * Sets new selectedShapeType, then tries to update servers
+   * @param {String} value AMF shape type
+   */
+  set selectedShapeType(value) {
+    const old = this._selectedShapeType;
+    if (old === value) {
+      return;
+    }
+    this._selectedShapeType = value;
+    const id = this.selectedShape
+    this._handleShapeChange(id, value);
+    this.requestUpdate('_selectedShapeType', old);
+  }
+
+  get selectedShapeType() {
+    return this._selectedShapeType;
+  }
+
+  /**
+   * Receives shape id and shape type, and looks for endpointId
+   * if the type is 'endpoint'
+   * @param {String} id AMF shape id
+   * @param {String} type AMF shape type
+   * @private
+   */
+  _handleShapeChange(id, type) {
+    let endpointId;
+    if (type === 'endpoint') {
+      endpointId = this._getEndpointIdForMethod(id);
+    }
+    this.updateServers({ id, type, endpointId });
+  }
+
+  /**
+   * Computes the endpoint id based on a given method id
+   * Returns undefined is endpoint is not found
+   * @param {String} methodId The AMF id of the method
+   * @return {String|undefined}
+   * @private
+   */
+  _getEndpointIdForMethod(methodId) {
+    const webApi = this._computeWebApi(this.amf)
+    let endpoint = this._computeMethodEndpoint(webApi, methodId);
+    if (Array.isArray(endpoint)) {
+      endpoint = endpoint[0];
+    }
+    return endpoint ? this._getValue(endpoint, '@id') : undefined;
+  }
+
   constructor() {
     super();
     this._handleNavigationChange = this._handleNavigationChange.bind(this);
@@ -372,19 +447,10 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
    * This is asynchronous operation.
    */
   async __amfChanged() {
-    this.updateServers();
+    const { selectedShape, selectedShapeType } = this;
+    this._handleShapeChange(selectedShape, selectedShapeType);
     await this.updateComplete;
     this.selectIfNeeded();
-  }
-
-  set selectedValue(value) {
-    const old = this._selectedValue;
-    if (old === value) {
-      return;
-    }
-    this._selectedValue = value;
-    this.updateServers({ id: value, type: 'method' });
-    this.requestUpdate('selectedValue', old);
   }
 
   /**
@@ -463,6 +529,8 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
     if (serverDefinitionAllowedTypes.indexOf(type) === -1) {
       return;
     }
+    this.selectedShape = selected;
+    this.selectedShapeType = type;
     this.updateServers({ id: selected, type, endpointId });
     await this.updateComplete;
     this.selectIfNeeded();
@@ -510,6 +578,9 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
    * @param {String=} selectedNodeParams.endpointId Optional endpoint id the method id belongs to
    */
   updateServers({ id, type, endpointId } = {}) {
+    if (id && type && !this._isNodeIdOfType(id, type)) {
+      return;
+    }
     let methodId;
     if (type === 'method') {
       methodId = id;
@@ -518,6 +589,18 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
       endpointId = id;
     }
     this.servers = this._getServers({ endpointId, methodId });
+  }
+
+  _isNodeIdOfType(id, type) {
+    const webApi = this._computeWebApi(this.amf);
+    if (type === 'method') {
+      return Boolean(this._computeMethodModel(webApi, id));
+    }
+    if (type === 'endpoint') {
+      const endpointModel = this._computeEndpointModel(webApi, id);
+      return Boolean(endpointModel);
+    }
+    return false;
   }
 
   /**

@@ -114,6 +114,12 @@ describe('<api-server-selector>', () => {
     </api-server-selector>`);
   }
 
+  async function selectedShapeFixture(amf, selectedShape, selectedShapeType) {
+    return await fixture(html`
+      <api-server-selector .amf="${amf}" .selectedShape="${selectedShape}" .selectedShapeType="${selectedShapeType}">
+    </api-server-selector>`);
+  }
+
   describe('basic usage', () => {
     it('renders empty dropdown', async () => {
       const element = await basicFixture();
@@ -837,6 +843,64 @@ describe('<api-server-selector>', () => {
           element.value = 'super-custom';
           await nextFrame();
           assert.isTrue(element.isCustom);
+        });
+      });
+
+      describe('selectedShape & selectedShapeType', () => {
+        let amf;
+        let element;
+        let method;
+        let methodId;
+
+        before(async () => {
+          amf = await AmfLoader.load(compact);
+        });
+
+        beforeEach(async () => {
+          element = await basicFixture(amf);
+          method = AmfHelper.getMethod(element, amf, '/ping', 'get');
+          methodId = element._getValue(method, '@id');
+        });
+
+        it('should load method servers on init', async () => {
+          element = await selectedShapeFixture(amf, methodId, 'method');
+          assert.equal(element.servers.length, 2)
+        });
+
+        it('should load root servers on init with invalid selectedShape', async () => {
+          element = await selectedShapeFixture(amf, '', 'method');
+          assert.equal(element.servers.length, 4)
+        });
+
+        it('should load root servers on init with invalid selectedShapeType', async () => {
+          element = await selectedShapeFixture(amf, methodId, '');
+          assert.equal(element.servers.length, 4)
+        });
+
+        it('should change to new endpoint\'s servers after navigation', async () => {
+          element = await selectedShapeFixture(amf, methodId, 'method');
+          const endpoint = AmfHelper.getEndpoint(element, amf, '/ping');
+          const id = endpoint['@id'];
+          const detail = {
+            selected: id,
+            type: 'endpoint'
+          };
+          dispatchNavigate(detail);
+          await nextFrame();
+          assert.lengthOf(element.servers, 1);
+        });
+
+        it('should change to new method\'s servers after navigation', async () => {
+          element = await selectedShapeFixture(amf, methodId, 'method');
+          const nextMethod = AmfHelper.getMethod(element, amf, '/files', 'get');
+          const id = nextMethod['@id'];
+          const detail = {
+            selected: id,
+            type: 'method'
+          };
+          dispatchNavigate(detail);
+          await nextFrame();
+          assert.lengthOf(element.servers, 1);
         });
       });
     });
