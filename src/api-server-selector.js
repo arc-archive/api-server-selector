@@ -1,6 +1,5 @@
 import { html, LitElement } from 'lit-element';
 import { AmfHelperMixin } from '@api-components/amf-helper-mixin/amf-helper-mixin.js';
-import { EventsTargetMixin } from '@advanced-rest-client/events-target-mixin/events-target-mixin.js';
 import '@anypoint-web-components/anypoint-input/anypoint-input.js';
 import '@anypoint-web-components/anypoint-dropdown-menu/anypoint-dropdown-menu.js';
 import '@anypoint-web-components/anypoint-listbox/anypoint-listbox.js';
@@ -25,9 +24,8 @@ const serverCountEventType = 'serverscountchanged';
  * An element to generate view model for server
  * elements from AMF model
  *
- * This component receives an AMF model, and listens
- * to navigation events to know which node's servers
- * it should render.
+ * This component receives an AMF model, and selected node's id and type
+ * to know which servers to render
  *
  * When the selected server changes, it dispatches an `api-server-changed`
  * event, with the following details:
@@ -55,7 +53,7 @@ const serverCountEventType = 'serverscountchanged';
  * @mixes EventTargetMixin
  * @extends LitElement
  */
-export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitElement)) {
+export class ApiServerSelector extends AmfHelperMixin(LitElement) {
   static get properties() {
     return {
       /**
@@ -110,6 +108,17 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
        * Note, this does nothing when custom element is rendered.
        */
       opened: { type: Boolean },
+
+      /**
+       * An `@id` of selected AMF shape.
+       * When changed, it computes servers for the selection
+       */
+      selectedShape: { type: String },
+      /**
+       * The type of the selected AMF shape.
+       * When changed, it computes servers for the selection
+       */
+      selectedShapeType: { type: String },
     };
   }
 
@@ -313,9 +322,77 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
     return serversCount;
   }
 
+  /**
+   * Sets new selectedShape, then tries to update servers
+   * @param {String} value AMF shape id
+   */
+  set selectedShape(value) {
+    const old = this._selectedShape;
+    if (old === value) {
+      return;
+    }
+    this._selectedShape = value;
+    const type = this.selectedShapeType;
+    this._handleShapeChange(value, type);
+    this.requestUpdate('selectedShape', old);
+  }
+
+  get selectedShape() {
+    return this._selectedShape;
+  }
+
+  /**
+   * Sets new selectedShapeType, then tries to update servers
+   * @param {String} value AMF shape type
+   */
+  set selectedShapeType(value) {
+    const old = this._selectedShapeType;
+    if (old === value) {
+      return;
+    }
+    this._selectedShapeType = value;
+    const id = this.selectedShape
+    this._handleShapeChange(id, value);
+    this.requestUpdate('_selectedShapeType', old);
+  }
+
+  get selectedShapeType() {
+    return this._selectedShapeType;
+  }
+
+  /**
+   * Receives shape id and shape type, and looks for endpointId
+   * if the type is 'endpoint'
+   * @param {String} id AMF shape id
+   * @param {String} type AMF shape type
+   * @private
+   */
+  _handleShapeChange(id, type) {
+    let endpointId;
+    if (type === 'endpoint') {
+      endpointId = this._getEndpointIdForMethod(id);
+    }
+    this.updateServers({ id, type, endpointId });
+  }
+
+  /**
+   * Computes the endpoint id based on a given method id
+   * Returns undefined is endpoint is not found
+   * @param {String} methodId The AMF id of the method
+   * @return {String|undefined}
+   * @private
+   */
+  _getEndpointIdForMethod(methodId) {
+    const webApi = this._computeWebApi(this.amf)
+    let endpoint = this._computeMethodEndpoint(webApi, methodId);
+    if (Array.isArray(endpoint)) {
+      endpoint = endpoint[0];
+    }
+    return endpoint ? this._getValue(endpoint, '@id') : undefined;
+  }
+
   constructor() {
     super();
-    this._handleNavigationChange = this._handleNavigationChange.bind(this);
     this._customNodesCount = 0;
     this.value = '';
     this.opened = false;
@@ -331,16 +408,6 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
 
   firstUpdated() {
     this._notifyServersCount();
-  }
-
-  _attachListeners(node) {
-    super._attachListeners(node);
-    node.addEventListener('api-navigation-selection-changed', this._handleNavigationChange);
-  }
-
-  _detachListeners(node) {
-    super._detachListeners(node);
-    node.removeEventListener('api-navigation-selection-changed', this._handleNavigationChange);
   }
 
   /**
@@ -367,14 +434,15 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
    * This is asynchronous operation.
    */
   async __amfChanged() {
-    this.updateServers();
+    const { selectedShape, selectedShapeType } = this;
+    this._handleShapeChange(selectedShape, selectedShapeType);
     await this.updateComplete;
     this.selectIfNeeded();
   }
 
   /**
    * Executes auto selection logic.
-   * It selectes a fist available sever from the serves list when AMF or operation
+   * It selects a fist available sever from the serves list when AMF or operation
    * selection changed.
    * If there are no servers, but there are custom slots available, then select
    * first custom slot
@@ -439,21 +507,6 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
   }
 
   /**
-   * Handler for the `api-navigation-selection-changed` event.
-   * @param {CustomEvent} e
-   */
-  async _handleNavigationChange(e) {
-    const { selected, type, endpointId } = e.detail;
-    const serverDefinitionAllowedTypes = ['endpoint', 'method'];
-    if (serverDefinitionAllowedTypes.indexOf(type) === -1) {
-      return;
-    }
-    this.updateServers({ id: selected, type, endpointId });
-    await this.updateComplete;
-    this.selectIfNeeded();
-  }
-
-  /**
    * Takes care of recognizing whether a server selection should be cleared.
    * This happes when list of servers change and with the new list of server
    * current selection does not exist.
@@ -495,6 +548,9 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
    * @param {String=} selectedNodeParams.endpointId Optional endpoint id the method id belongs to
    */
   updateServers({ id, type, endpointId } = {}) {
+    if (id && type && !this._isNodeIdOfType(id, type)) {
+      return;
+    }
     let methodId;
     if (type === 'method') {
       methodId = id;
@@ -503,6 +559,25 @@ export class ApiServerSelector extends EventsTargetMixin(AmfHelperMixin(LitEleme
       endpointId = id;
     }
     this.servers = this._getServers({ endpointId, methodId });
+  }
+
+  /**
+   * Checks if an AMF node id corresponds to the provided type
+   * @param {String} id AMF node id
+   * @param {String} type AMF node type
+   * @return {boolean}
+   * @private
+   */
+  _isNodeIdOfType(id, type) {
+    const webApi = this._computeWebApi(this.amf);
+    if (type === 'method') {
+      return Boolean(this._computeMethodModel(webApi, id));
+    }
+    if (type === 'endpoint') {
+      const endpointModel = this._computeEndpointModel(webApi, id);
+      return Boolean(endpointModel);
+    }
+    return false;
   }
 
   /**

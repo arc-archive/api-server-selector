@@ -16,8 +16,6 @@ import {html, LitElement} from 'lit-element';
 
 import {AmfHelperMixin} from '@api-components/amf-helper-mixin/amf-helper-mixin.js';
 
-import {EventsTargetMixin} from '@advanced-rest-client/events-target-mixin/events-target-mixin.js';
-
 export {ApiServerSelector};
 
 /**
@@ -25,9 +23,8 @@ export {ApiServerSelector};
  * An element to generate view model for server
  * elements from AMF model
  *
- * This component receives an AMF model, and listens
- * to navigation events to know which node's servers
- * it should render.
+ * This component receives an AMF model, and selected node's id and type
+ * to know which servers to render
  *
  * When the selected server changes, it dispatches an `api-server-changed`
  * event, with the following details:
@@ -91,6 +88,18 @@ declare class ApiServerSelector extends
   readonly _serversCount: Number|null;
 
   /**
+   * An `@id` of selected AMF shape.
+   * When changed, it computes servers for the selection
+   */
+  selectedShape: string|null|undefined;
+
+  /**
+   * The type of the selected AMF shape.
+   * When changed, it computes servers for the selection
+   */
+  selectedShapeType: string|null|undefined;
+
+  /**
    * Currently selected type of the input.
    * `server` | `uri` | `custom`
    */
@@ -125,8 +134,6 @@ declare class ApiServerSelector extends
   constructor();
   firstUpdated(): void;
   render(): any;
-  _attachListeners(node: any): void;
-  _detachListeners(node: any): void;
 
   /**
    * Dispatches the `servers-count-changed` event with the current number of rendered servers.
@@ -142,8 +149,10 @@ declare class ApiServerSelector extends
 
   /**
    * Executes auto selection logic.
-   * It selectes a fist available sever from the serves list when AMF or operation
+   * It selects a fist available sever from the serves list when AMF or operation
    * selection changed.
+   * If there are no servers, but there are custom slots available, then select
+   * first custom slot
    * When there's already valid selection then it does nothing.
    */
   selectIfNeeded(): void;
@@ -155,11 +164,6 @@ declare class ApiServerSelector extends
    * @returns A selection info object
    */
   _selectionInfo(value?: String|null): SelectionInfo|null;
-
-  /**
-   * Handler for the `api-navigation-selection-changed` event.
-   */
-  _handleNavigationChange(e: CustomEvent|null): any;
 
   /**
    * Takes care of recognizing whether a server selection should be cleared.
