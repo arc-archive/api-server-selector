@@ -190,7 +190,6 @@ declare class ApiServerSelector extends
   type,
   endpointId
 } = {}: any): void;
-  _isNodeIdOfType(id: any, type: any): any;
 
   /**
    * Handler for the listbox's change event

@@ -561,6 +561,13 @@ export class ApiServerSelector extends AmfHelperMixin(LitElement) {
     this.servers = this._getServers({ endpointId, methodId });
   }
 
+  /**
+   * Checks if an AMF node id corresponds to the provided type
+   * @param {String} id AMF node id
+   * @param {String} type AMF node type
+   * @return {boolean}
+   * @private
+   */
   _isNodeIdOfType(id, type) {
     const webApi = this._computeWebApi(this.amf);
     if (type === 'method') {
