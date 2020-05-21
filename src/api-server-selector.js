@@ -207,6 +207,17 @@ export class ApiServerSelector extends AmfHelperMixin(LitElement) {
    * @param {String} value The value to render.
    */
   set value(value) {
+    this._setValue(value);
+  }
+
+  /**
+   * Async function to set value after component has finished updating
+   * @param {String} value
+   * @return {Promise<void>}
+   * @private
+   */
+  async _setValue(value) {
+    await this.updateComplete;
     if (this.baseUri) {
       return;
     }

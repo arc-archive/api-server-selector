@@ -120,6 +120,17 @@ describe('<api-server-selector>', () => {
     </api-server-selector>`);
   }
 
+  async function selectedShapeFixtureWithValue(amf, selectedShape, selectedShapeType, value) {
+    return await fixture(html`
+      <api-server-selector
+        .amf="${amf}"
+        .value="${value}"
+        .selectedShape="${selectedShape}"
+        .selectedShapeType="${selectedShapeType}"
+      >
+    </api-server-selector>`);
+  }
+
   describe('basic usage', () => {
     it('renders empty dropdown', async () => {
       const element = await basicFixture();
@@ -196,6 +207,7 @@ describe('<api-server-selector>', () => {
       const spy = sinon.spy();
       element.addEventListener('apiserverchanged', spy);
       element.value = 'https://example.com';
+      await nextFrame();
       assert.isTrue(spy.called, 'event is dispatched');
       const { detail } = spy.args[0][0];
       assert.deepEqual(detail, {
@@ -215,6 +227,7 @@ describe('<api-server-selector>', () => {
     it('removed the input when close is clicked', async () => {
       const element = await customInputFixture();
       element.value = 'test';
+      await nextFrame();
       const node = element.shadowRoot.querySelector('anypoint-icon-button');
       node.click();
       await nextFrame();
@@ -401,6 +414,7 @@ describe('<api-server-selector>', () => {
 
           const node = element.shadowRoot.querySelector('[value="https://{customerId}.saas-app.com:{port}/v2"]');
           node.click();
+          await nextFrame();
 
           assert.equal(element.value, 'https://{customerId}.saas-app.com:{port}/v2');
           assert.equal(element.type, 'server');
@@ -901,6 +915,11 @@ describe('<api-server-selector>', () => {
           await nextFrame();
           assert.lengthOf(element.servers, 1);
         });
+
+        it('starts with a selected server value that is not the first one available', async () => {
+          element = await selectedShapeFixtureWithValue(amf, methodId, 'method', 'https://echo2.example.com');
+          assert.equal(element.value, 'https://echo2.example.com');
+        });
       });
     });
   });
@@ -921,11 +940,12 @@ describe('<api-server-selector>', () => {
       assert.isTrue(element.onapiserverchange === fn);
     });
 
-    it('calls the callback function', () => {
+    it('calls the callback function', async () => {
       let called = false;
       const fn = () => { called = true; };
       element.onapiserverchange = fn;
       element.value = 'https://example.com';
+      await nextFrame();
       assert.isTrue(called);
     });
 
@@ -938,7 +958,7 @@ describe('<api-server-selector>', () => {
       assert.isFalse(called);
     });
 
-    it('unregisters old function', () => {
+    it('unregisters old function', async () => {
       let called1 = false;
       let called2 = false;
       const fn1 = () => { called1 = true; };
@@ -946,6 +966,7 @@ describe('<api-server-selector>', () => {
       element.onapiserverchange = fn1;
       element.onapiserverchange = fn2;
       element.value = 'https://example.com';
+      await nextFrame();
       assert.isFalse(called1);
       assert.isTrue(called2);
     });
