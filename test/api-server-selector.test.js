@@ -642,9 +642,16 @@ describe('<api-server-selector>', () => {
             type: 'method',
             endpointId: endpoint1['@id'],
           };
+          // selected is /default GET
+          // which has 4 servers
+          // first one being https://{customerId}.saas-app.com:{port}/v2
           changeSelection(element, detail);
+          await nextFrame();
+          assert.equal(element.value, 'https://{customerId}.saas-app.com:{port}/v2', 'First assertion failed');
+          // http://beta.api.openweathermap.org/data/2.5/ is 4th available server for /default GET
           element.value = 'http://beta.api.openweathermap.org/data/2.5/';
           await nextFrame();
+          assert.equal(element.value, 'http://beta.api.openweathermap.org/data/2.5/', 'Second assertion failed');
           const detail2 = {
             selected: method2['@id'],
             type: 'method',
@@ -652,7 +659,7 @@ describe('<api-server-selector>', () => {
           };
           changeSelection(element, detail2);
           await nextFrame();
-          assert.equal(element.value, 'http://beta.api.openweathermap.org/data/2.5/');
+          assert.equal(element.value, 'http://beta.api.openweathermap.org/data/2.5/', 'Third assertion failed');
         });
 
         describe('no servers in model', () => {
