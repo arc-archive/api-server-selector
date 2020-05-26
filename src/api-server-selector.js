@@ -215,6 +215,19 @@ export class ApiServerSelector extends AmfHelperMixin(LitElement) {
     if (old === value) {
       return;
     }
+    this._value = value;
+    this.requestUpdate('value', old);
+    this._setValue(value);
+  }
+
+  /**
+   * Async function to set value after component has finished updating
+   * @param {String} value
+   * @return {Promise<void>}
+   * @private
+   */
+  async _setValue(value) {
+    await this.updateComplete;
     const { type, value: effectiveValue } = this._selectionInfo(value);
     if (type === 'custom' && !this.allowCustom) {
       return;
@@ -222,8 +235,6 @@ export class ApiServerSelector extends AmfHelperMixin(LitElement) {
     if (this.type !== type) {
       this.type = type;
     }
-    this._value = effectiveValue;
-    this.requestUpdate('value', old);
     this.dispatchEvent(
       new CustomEvent(apiChangeEventType, {
         detail: {
