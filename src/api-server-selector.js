@@ -216,8 +216,8 @@ export class ApiServerSelector extends AmfHelperMixin(LitElement) {
       return;
     }
     this._value = value;
-    this.requestUpdate('value', old);
     this._setValue(value);
+    this.requestUpdate('value', old);
   }
 
   /**
