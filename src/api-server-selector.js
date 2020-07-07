@@ -727,6 +727,7 @@ export class ApiServerSelector extends AmfHelperMixin(LitElement) {
       ?compatibility="${compatibility}"
       ?outlined="${outlined}"
       .opened="${opened}"
+      fitPositionTarget
       @opened-changed="${this._openedHandler}"
     >
       <label slot="label">Select server</label>

@@ -341,6 +341,15 @@ describe('<api-server-selector>', () => {
       const node = element.shadowRoot.querySelector('anypoint-dropdown-menu');
       assert.isFalse(node.opened);
     });
+
+    it('sets fitPositionTarget', async () => {
+      element.opened = true;
+      await nextFrame();
+      element.opened = false;
+      await nextFrame();
+      const node = element.shadowRoot.querySelector('anypoint-dropdown-menu');
+      assert.isTrue(node.fitPositionTarget);
+    });
   });
 
   [
