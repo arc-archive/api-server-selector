@@ -559,9 +559,6 @@ export class ApiServerSelector extends AmfHelperMixin(LitElement) {
    * @param {String=} selectedNodeParams.endpointId Optional endpoint id the method id belongs to
    */
   updateServers({ id, type, endpointId } = {}) {
-    if (id && type && !this._isNodeIdOfType(id, type)) {
-      return;
-    }
     let methodId;
     if (type === 'method') {
       methodId = id;
