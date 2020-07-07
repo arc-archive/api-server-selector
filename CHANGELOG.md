@@ -295,3 +295,46 @@
 * add tests [79fbadb](https://github.com/advanced-rest-client/api-server-selector/commit/79fbadbf2d5a8169cb5e4228762eb1f0d748b8a1) by Francisco Di Giandomenico
 
 
+<a name="0.5.3"></a>
+## [0.5.3](https://github.com/advanced-rest-client/api-server-selector/compare/0.4.0...0.5.3) (2020-07-07)
+
+### Build
+
+* bump versions [6dc6c45](https://github.com/advanced-rest-client/api-server-selector/commit/6dc6c45f1b748e0a3bc49767d1611502434da80d) by Carolina Wright
+* bump version [7bd7546](https://github.com/advanced-rest-client/api-server-selector/commit/7bd7546adb573fea9a913ad8ae72c6bc24a8c5da) by Francisco Di Giandomenico
+* bump version [4302a3a](https://github.com/advanced-rest-client/api-server-selector/commit/4302a3a4d723b942048c6f2bea93a570c9896404) by Francisco Di Giandomenico
+* bump version [31dd579](https://github.com/advanced-rest-client/api-server-selector/commit/31dd5795b3837a53838a7deed0db8d2cd1fd0048) by Francisco Di Giandomenico
+* bumping version [fd10c67](https://github.com/advanced-rest-client/api-server-selector/commit/fd10c674638d4338e592b1501f8487c601b81831) by Pawel
+
+
+### Update
+
+* remove EventsTargetMixin dependency [ea00c91](https://github.com/advanced-rest-client/api-server-selector/commit/ea00c91d45b8ed8b4c0e76dc1333e37ba7af2788) by Francisco Di Giandomenico
+* [ci skip] automated merge master->stage. syncing main branches [e09b250](https://github.com/advanced-rest-client/api-server-selector/commit/e09b2500c0deb8c673ecc9f2823e66f7e8451940) by Ci agent
+* [ci skip] automated merge master->stage. syncing main branches [c7d3fb4](https://github.com/advanced-rest-client/api-server-selector/commit/c7d3fb434bcdc69b622427e1d90ecc2a9bbadfca) by Ci agent
+
+
+### Documentation
+
+* remove doc for private method [2458e47](https://github.com/advanced-rest-client/api-server-selector/commit/2458e475af4c4ba3baaafc904d55ddbfc49b97c8) by Francisco Di Giandomenico
+
+
+### Features
+
+* apic-400 fit width of anypoint-dropdown-menu [420b9b9](https://github.com/advanced-rest-client/api-server-selector/commit/420b9b957d52cceca14b20b4d944c2aad04603a7) by Carolina Wright
+* add selectedShape and selectedShapeType [f02bb63](https://github.com/advanced-rest-client/api-server-selector/commit/f02bb63d3a2f9ceeda27d1a9b5dc84d574c9a27f) by Francisco Di Giandomenico
+
+
+### Bug Fixes
+
+* call async function before requestUpdate (#21) [c1e384f](https://github.com/advanced-rest-client/api-server-selector/commit/c1e384fecacd2c2dfce30618cc938fff8c5114b1) by Francisco Di Giandomenico
+* typo [00123cf](https://github.com/advanced-rest-client/api-server-selector/commit/00123cf3aadd0f1e473521387caa0488e5b06439) by Francisco Di Giandomenico
+* fixing custom auto selection issues [9df1ec4](https://github.com/advanced-rest-client/api-server-selector/commit/9df1ec4b72cf788ff5a798f2ac7d28777e11c85d) by Pawel
+
+
+### Testing
+
+* anypoint-dropdown-menu new property setted [02c7467](https://github.com/advanced-rest-client/api-server-selector/commit/02c74675441bec659e2692de376fc8268ace0715) by Carolina Wright
+* increate test timeout to 15 s [6841387](https://github.com/advanced-rest-client/api-server-selector/commit/6841387be85c3d3ff1d64e786288444c17f1dd56) by Francisco Di Giandomenico
+
+
