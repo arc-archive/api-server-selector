@@ -194,6 +194,16 @@ describe('<api-server-selector>', () => {
       assert.equal(element.type, 'custom');
       assert.equal(element.baseUri, 'https://www.google.com');
     });
+
+    it('resets value when no server', async () => {
+      const element = await basicFixture();
+      await nextFrame();
+
+      element._updateServerSelection(undefined)
+      await nextFrame();
+      assert.equal(element.value, '');
+      assert.equal(element.type, 'server');
+    });
   });
 
   describe('#allowCustom', () => {
