@@ -381,3 +381,31 @@
 * increate test timeout to 15 s [6841387](https://github.com/advanced-rest-client/api-server-selector/commit/6841387be85c3d3ff1d64e786288444c17f1dd56) by Francisco Di Giandomenico
 
 
+<a name="0.5.5"></a>
+## [0.5.5](https://github.com/advanced-rest-client/api-server-selector/compare/0.5.3...0.5.5) (2020-11-04)
+
+### Build
+
+* bump version [b2be0ca](https://github.com/advanced-rest-client/api-server-selector/commit/b2be0caa87f57c35b6f2bac2a22096a14772c606) by Carolina Wright
+* bump version [08507ac](https://github.com/advanced-rest-client/api-server-selector/commit/08507ac02aefb6e2e86dba18fb6097a6b5fc500b) by Carolina Wright
+
+
+### Update
+
+* generate models before test [e99a3f4](https://github.com/advanced-rest-client/api-server-selector/commit/e99a3f4896a69c17976661399918bc932b935403) by Carolina Wright
+* [ci skip] automated merge master->stage. syncing main branches [afbf075](https://github.com/advanced-rest-client/api-server-selector/commit/afbf07564a2815fdabde6a5c63367674522297f0) by Ci agent
+* [ci skip] automated merge master->stage. syncing main branches [80618db](https://github.com/advanced-rest-client/api-server-selector/commit/80618db5eee70f27afb38951f1df9f06d986cf5f) by Ci agent
+
+
+### Bug Fixes
+
+* amf loader demo file url [ef7cb66](https://github.com/advanced-rest-client/api-server-selector/commit/ef7cb6677e58734ee1c775b5909f4e3eeb9fb5ad) by Carolina Wright
+* apic-525 reset selector when empty server [7bdbeb2](https://github.com/advanced-rest-client/api-server-selector/commit/7bdbeb294babd3f6b5a0d43a55751c5eb07d241d) by Carolina Wright
+* apic-406 update servers when id or type changes [65e85c2](https://github.com/advanced-rest-client/api-server-selector/commit/65e85c2f29412708a869237c69d6652e19b47f43) by Carolina Wright
+
+
+### Testing
+
+* cleaned selector [f2462c7](https://github.com/advanced-rest-client/api-server-selector/commit/f2462c79236ce1638d34709cb964c77a72ea8986) by Carolina Wright
+
+
