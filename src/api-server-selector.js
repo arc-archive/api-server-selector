@@ -519,13 +519,16 @@ export class ApiServerSelector extends AmfHelperMixin(LitElement) {
 
   /**
    * Takes care of recognizing whether a server selection should be cleared.
-   * This happes when list of servers change and with the new list of server
+   * This happens when list of servers change and with the new list of server
    * current selection does not exist.
    * This ignores the selection when current type is not a `server`.
    *
    * @param {Array<Object>} servers List of new servers
    */
   _updateServerSelection(servers) {
+    if (!servers) {
+      this._resetSelection();
+    }
     if (!servers || this.type !== 'server') {
       return;
     }

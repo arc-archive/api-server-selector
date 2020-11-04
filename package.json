@@ -1,6 +1,6 @@
 {
   "name": "@api-components/api-server-selector",
-  "version": "0.5.4",
+  "version": "0.5.5",
   "description": "A component that renders OAS' servers as a dropdown option to select API server.",
   "license": "Apache-2.0",
   "main": "index.js",
@@ -37,6 +37,7 @@
     "test:prune-snapshots": "karma start --prune-snapshots",
     "storybook": "start-storybook --node-resolve --watch --open",
     "storybook:build": "build-storybook",
+    "generate-model": "node demo/model.js",
     "prepare": "node demo/model.js"
   },
   "dependencies": {
