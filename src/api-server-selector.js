@@ -394,7 +394,7 @@ export class ApiServerSelector extends AmfHelperMixin(LitElement) {
    * @private
    */
   _getEndpointIdForMethod(methodId) {
-    const webApi = this._computeWebApi(this.amf)
+    const webApi = this._computeApi(this.amf)
     let endpoint = this._computeMethodEndpoint(webApi, methodId);
     if (Array.isArray(endpoint)) {
       endpoint = endpoint[0];
@@ -580,7 +580,7 @@ export class ApiServerSelector extends AmfHelperMixin(LitElement) {
    * @private
    */
   _isNodeIdOfType(id, type) {
-    const webApi = this._computeWebApi(this.amf);
+    const webApi = this._computeApi(this.amf);
     if (type === 'method') {
       return Boolean(this._computeMethodModel(webApi, id));
     }
