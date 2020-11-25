@@ -409,3 +409,29 @@
 * cleaned selector [f2462c7](https://github.com/advanced-rest-client/api-server-selector/commit/f2462c79236ce1638d34709cb964c77a72ea8986) by Carolina Wright
 
 
+<a name="0.6.0"></a>
+## [0.6.0](https://github.com/advanced-rest-client/api-server-selector/compare/0.5.4...0.6.0) (2020-11-25)
+
+### Build
+
+* bump version [b2be0ca](https://github.com/advanced-rest-client/api-server-selector/commit/b2be0caa87f57c35b6f2bac2a22096a14772c606) by Carolina Wright
+
+
+### Update
+
+* [ci skip] automated merge master->stage. syncing main branches [e27e0c9](https://github.com/advanced-rest-client/api-server-selector/commit/e27e0c92a12cdd0e64ab77d3dbecccd9d5b23bed) by Ci agent
+* generate models before test [e99a3f4](https://github.com/advanced-rest-client/api-server-selector/commit/e99a3f4896a69c17976661399918bc932b935403) by Carolina Wright
+* [ci skip] automated merge master->stage. syncing main branches [afbf075](https://github.com/advanced-rest-client/api-server-selector/commit/afbf07564a2815fdabde6a5c63367674522297f0) by Ci agent
+
+
+### Bug Fixes
+
+* amf loader demo file url [ef7cb66](https://github.com/advanced-rest-client/api-server-selector/commit/ef7cb6677e58734ee1c775b5909f4e3eeb9fb5ad) by Carolina Wright
+* apic-525 reset selector when empty server [7bdbeb2](https://github.com/advanced-rest-client/api-server-selector/commit/7bdbeb294babd3f6b5a0d43a55751c5eb07d241d) by Carolina Wright
+
+
+### Testing
+
+* cleaned selector [f2462c7](https://github.com/advanced-rest-client/api-server-selector/commit/f2462c79236ce1638d34709cb964c77a72ea8986) by Carolina Wright
+
+
