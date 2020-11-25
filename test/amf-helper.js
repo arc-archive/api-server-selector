@@ -1,6 +1,6 @@
 export const AmfHelper = {};
 AmfHelper.getEndpoint = function (element, amf, path) {
-  const webApi = element._computeWebApi(amf);
+  const webApi = element._computeApi(amf);
   return element._computeEndpointByPath(webApi, path);
 };
 
