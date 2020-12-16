@@ -435,3 +435,12 @@
 * cleaned selector [f2462c7](https://github.com/advanced-rest-client/api-server-selector/commit/f2462c79236ce1638d34709cb964c77a72ea8986) by Carolina Wright
 
 
+<a name="0.6.1"></a>
+## [0.6.1](https://github.com/advanced-rest-client/api-server-selector/compare/0.5.5...0.6.1) (2020-12-16)
+
+### Update
+
+* [ci skip] automated merge master->stage. syncing main branches [01b0f24](https://github.com/advanced-rest-client/api-server-selector/commit/01b0f242f096971c2557abac049e3fb1fe61891f) by Ci agent
+* [ci skip] automated merge master->stage. syncing main branches [e27e0c9](https://github.com/advanced-rest-client/api-server-selector/commit/e27e0c92a12cdd0e64ab77d3dbecccd9d5b23bed) by Ci agent
+
+
