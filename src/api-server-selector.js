@@ -405,7 +405,6 @@ export class ApiServerSelector extends AmfHelperMixin(LitElement) {
   constructor() {
     super();
     this._customNodesCount = 0;
-    this.value = '';
     this.opened = false;
 
     /**
