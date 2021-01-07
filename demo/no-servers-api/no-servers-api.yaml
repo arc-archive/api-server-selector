@@ -9,23 +9,23 @@ paths:
     get:
       summary: "A get method"
       responses:
-        200:
+        '200':
           description: Successful response
   /files:
     description: File upload and download operations
     get:
       summary: "A get method"
       responses:
-        200:
+        '200':
           description: Successful response
   /ping:
     get:
       summary: "A get method"
       responses:
-        200:
+        '200':
           description: Successful response
     post:
       summary: "A post method"
       responses:
-        201:
+        '201':
           description: Successful create
