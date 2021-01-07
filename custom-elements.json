@@ -1,71 +1,160 @@
 {
-  "version": 2,
+  "version": "experimental",
   "tags": [
     {
       "name": "api-server-selector",
-      "description": "A component with a title and an action counter",
-      "properties": [
-        {
-          "name": "baseUri",
-          "type": "String",
-          "description": "The baseUri to override any server definition"
-        },
+      "path": "./api-server-selector.js",
+      "description": "`api-server-selector`\nAn element to generate view model for server\nelements from AMF model\n\nThis component receives an AMF model, and selected node's id and type\nto know which servers to render\n\nWhen the selected server changes, it dispatches an `api-server-changed`\nevent, with the following details:\n- Server value: the server id (for listed servers in the model), the URI\n    value (when custom base URI is selected), or the value of the `anypoint-item`\n    component rendered into the extra slot\n- Selected type: `server` | `custom` | `extra`\n    - `server`: server from the AMF model\n    - `custom`: custom base URI input change\n    - `extra`: extra slot's anypoint-item `value` attribute (see below)\n\nAdding extra slot:\nThis component renders a `slot` element to render anything the users wants\nto add in there. To enable this, sit the `extraOptions` value in this component\nto true, and render an element associated to the slot name `custom-base-uri`.\nThe items rendered in this slot should be `anypoint-item` components, and have a\n`value` attribute. This is the value that will be dispatched in the `api-server-changed`\nevent.",
+      "attributes": [
         {
           "name": "allowCustom",
-          "type": "Boolean",
           "description": "When set the `Custom base URI` is rendered in the dropdown",
-          "default": false
+          "type": "boolean | undefined"
         },
         {
-          "name": "servers",
-          "type": "Array",
-          "description": "The current list of servers to render"
-        },
-        {
-          "name": "type",
-          "type": "String",
-          "description": "Currently selected type of the input. Can be `server`, `uri`, or `custom`"
+          "name": "baseUri",
+          "description": "The baseUri to override any server definition",
+          "type": "string | undefined"
         },
         {
           "name": "value",
-          "type": "String",
-          "description": "Current value of the server"
+          "description": "The current value of the server",
+          "type": "string | undefined"
+        },
+        {
+          "name": "selectedShape",
+          "description": "An `@id` of selected AMF shape.\nWhen changed, it computes servers for the selection",
+          "type": "string | undefined"
+        },
+        {
+          "name": "selectedShapeType",
+          "description": "The type of the selected AMF shape.\nWhen changed, it computes servers for the selection",
+          "type": "string | undefined"
+        },
+        {
+          "name": "type",
+          "description": "Currently selected type of the input.\n`server` | `uri` | `custom`",
+          "type": "string"
         },
         {
           "name": "outlined",
-          "type": "Booelan",
-          "description": "Enables outlined material theme"
+          "description": "Enables outlined material theme",
+          "type": "boolean"
         },
         {
           "name": "compatibility",
-          "type": "Booelan",
-          "description": "Enables compatibility with the anypoint platform"
+          "description": "Enables compatibility with the anypoint platform",
+          "type": "boolean"
         },
         {
           "name": "autoSelect",
-          "type": "Booelan",
-          "description": "When set it automaticallt selected the first server from the list of servers when selection is missing."
+          "description": "When set it automatically selected the first server from the list\nof servers when selection is missing.",
+          "type": "boolean"
         },
         {
           "name": "opened",
-          "type": "Booelan",
-          "description": "A programmatic access to the opened state of the drop down.\nNote, this does nothing when custom element is rendered."
+          "description": "A programmatic access to the opened state of the drop down.\nNote, this does nothing when custom element is rendered.",
+          "type": "boolean"
         }
       ],
-      "events": [
+      "properties": [
         {
-          "name": "apiserverchanged"
+          "name": "styles",
+          "type": "CSSResult"
         },
         {
-          "name": "serverscountchanged"
-        }
-      ],
-      "slots": [
+          "name": "servers",
+          "description": "The current list of servers to render",
+          "type": "any[] | undefined"
+        },
         {
-          "name": "custom-base-uri"
+          "name": "allowCustom",
+          "attribute": "allowCustom",
+          "description": "When set the `Custom base URI` is rendered in the dropdown",
+          "type": "boolean | undefined"
+        },
+        {
+          "name": "baseUri",
+          "attribute": "baseUri",
+          "description": "The baseUri to override any server definition",
+          "type": "string | undefined"
+        },
+        {
+          "name": "value",
+          "attribute": "value",
+          "description": "The current value of the server",
+          "type": "string | undefined"
+        },
+        {
+          "name": "isCustom",
+          "type": "boolean"
+        },
+        {
+          "name": "isValueCustom",
+          "description": "Checks whether the current value is a custom value related to current list of servers.",
+          "type": "boolean"
+        },
+        {
+          "name": "onapiserverchange",
+          "type": "EventListenerObject | null"
+        },
+        {
+          "name": "onserverscountchange",
+          "type": "EventListenerObject | null"
+        },
+        {
+          "name": "selectedShape",
+          "attribute": "selectedShape",
+          "description": "An `@id` of selected AMF shape.\nWhen changed, it computes servers for the selection",
+          "type": "string | undefined"
+        },
+        {
+          "name": "selectedShapeType",
+          "attribute": "selectedShapeType",
+          "description": "The type of the selected AMF shape.\nWhen changed, it computes servers for the selection",
+          "type": "string | undefined"
+        },
+        {
+          "name": "type",
+          "attribute": "type",
+          "description": "Currently selected type of the input.\n`server` | `uri` | `custom`",
+          "type": "string"
+        },
+        {
+          "name": "outlined",
+          "attribute": "outlined",
+          "description": "Enables outlined material theme",
+          "type": "boolean"
+        },
+        {
+          "name": "compatibility",
+          "attribute": "compatibility",
+          "description": "Enables compatibility with the anypoint platform",
+          "type": "boolean"
+        },
+        {
+          "name": "autoSelect",
+          "attribute": "autoSelect",
+          "description": "When set it automatically selected the first server from the list\nof servers when selection is missing.",
+          "type": "boolean"
+        },
+        {
+          "name": "opened",
+          "attribute": "opened",
+          "description": "A programmatic access to the opened state of the drop down.\nNote, this does nothing when custom element is rendered.",
+          "type": "boolean"
+        },
+        {
+          "name": "ns",
+          "description": "A namespace for AMF model.",
+          "type": "Namespace"
+        },
+        {
+          "name": "amf",
+          "description": "Generated AMF json/ld model form the API spec.\nThe element assumes the object of the first array item to be a\ntype of `\"http://raml.org/vocabularies/document#Document`\non AMF vocabulary.\n\nIt is only usefult for the element to resolve references.",
+          "type": "object | object[] | undefined"
         }
-      ],
-      "cssProperties": []
+      ]
     }
   ]
 }

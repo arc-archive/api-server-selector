@@ -1,3 +1,6 @@
+/* eslint-disable arrow-body-style */
+/* eslint-disable no-plusplus */
+/* eslint-disable class-methods-use-this */
 import { html, LitElement } from 'lit-element';
 import { AmfHelperMixin } from '@api-components/amf-helper-mixin/amf-helper-mixin.js';
 import '@anypoint-web-components/anypoint-input/anypoint-input.js';
@@ -6,15 +9,12 @@ import '@anypoint-web-components/anypoint-listbox/anypoint-listbox.js';
 import '@anypoint-web-components/anypoint-item/anypoint-item.js';
 import '@anypoint-web-components/anypoint-button/anypoint-icon-button.js';
 import { close } from '@advanced-rest-client/arc-icons/ArcIcons.js';
-import styles from './styles.js';
+import elementStyles from './styles.js';
 
 /** @typedef {import('lit-html').TemplateResult} TemplateResult */
+/** @typedef {import('./api-server-selector').SelectionInfo} SelectionInfo */
+/** @typedef {import('./api-server-selector').UpdateServersOptions} UpdateServersOptions */
 
-/**
- * @typedef {Object} SelectionInfo
- * @property {String} type Type of detected selection
- * @property {String} value Normalized value to be used as editor value
- */
 
 const apiChangeEventType = 'apiserverchanged';
 const serverCountEventType = 'serverscountchanged';
@@ -44,14 +44,6 @@ const serverCountEventType = 'serverscountchanged';
  * The items rendered in this slot should be `anypoint-item` components, and have a
  * `value` attribute. This is the value that will be dispatched in the `api-server-changed`
  * event.
- *
- *
- *
- * @customElement
- * @demo demo/index.html
- * @mixes AmfHelperMixin
- * @mixes EventTargetMixin
- * @extends LitElement
  */
 export class ApiServerSelector extends AmfHelperMixin(LitElement) {
   static get properties() {
@@ -98,7 +90,7 @@ export class ApiServerSelector extends AmfHelperMixin(LitElement) {
       _customNodesCount: { type: Number },
 
       /**
-       * When set it automaticallt selected the first server from the list
+       * When set it automatically selected the first server from the list
        * of servers when selection is missing.
        */
       autoSelect: { type: Boolean },
@@ -123,11 +115,11 @@ export class ApiServerSelector extends AmfHelperMixin(LitElement) {
   }
 
   get styles() {
-    return styles;
+    return elementStyles;
   }
 
   /**
-   * @return {Array<String>} Computed list of all URI values from both the servers
+   * @return {string[]} Computed list of all URI values from both the servers
    * and the list of rendered custom items.
    */
   get _serverValues() {
@@ -199,10 +191,10 @@ export class ApiServerSelector extends AmfHelperMixin(LitElement) {
   }
 
   /**
-   * Sets currenlty rendered value.
+   * Sets currently rendered value.
    * If the value is not one of the drop down options then it renders custom control.
    *
-   * This can be used to programatically set a value of the control.
+   * This can be used to programmatically set a value of the control.
    *
    * @param {String} value The value to render.
    */
@@ -272,7 +264,7 @@ export class ApiServerSelector extends AmfHelperMixin(LitElement) {
   }
 
   /**
-   * @return {EventListenerObject|null} Previously registed callback function for
+   * @return {EventListenerObject|null} Previously registered callback function for
    * the `api-server-changed` event.
    */
   get onapiserverchange() {
@@ -298,7 +290,7 @@ export class ApiServerSelector extends AmfHelperMixin(LitElement) {
   }
 
   /**
-   * @return {EventListenerObject|null} Previously registed callback function for
+   * @return {EventListenerObject|null} Previously registered callback function for
    * the `servers-count-changed` event.
    */
   get onserverscountchange() {
@@ -354,7 +346,7 @@ export class ApiServerSelector extends AmfHelperMixin(LitElement) {
 
   /**
    * Sets new selectedShapeType, then tries to update servers
-   * @param {String} value AMF shape type
+   * @param {string} value AMF shape type
    */
   set selectedShapeType(value) {
     const old = this._selectedShapeType;
@@ -374,8 +366,8 @@ export class ApiServerSelector extends AmfHelperMixin(LitElement) {
   /**
    * Receives shape id and shape type, and looks for endpointId
    * if the type is 'endpoint'
-   * @param {String} id AMF shape id
-   * @param {String} type AMF shape type
+   * @param {string} id AMF shape id
+   * @param {string} type AMF shape type
    * @private
    */
   _handleShapeChange(id, type) {
@@ -389,29 +381,32 @@ export class ApiServerSelector extends AmfHelperMixin(LitElement) {
   /**
    * Computes the endpoint id based on a given method id
    * Returns undefined is endpoint is not found
-   * @param {String} methodId The AMF id of the method
-   * @return {String|undefined}
+   * @param {string} methodId The AMF id of the method
+   * @return {string|undefined}
    * @private
    */
   _getEndpointIdForMethod(methodId) {
     const webApi = this._computeApi(this.amf)
     let endpoint = this._computeMethodEndpoint(webApi, methodId);
     if (Array.isArray(endpoint)) {
-      endpoint = endpoint[0];
+      [endpoint] = endpoint;
     }
-    return endpoint ? this._getValue(endpoint, '@id') : undefined;
+    return endpoint ? /** @type string */ (this._getValue(endpoint, '@id')) : undefined;
   }
 
   constructor() {
     super();
     this._customNodesCount = 0;
     this.opened = false;
+    this.autoSelect = false;
+    this.compatibility = false;
+    this.outlined = false;
 
     /**
      * A list of custom items rendered in the slot.
      * This property is received from the list box that mixes in `AnypointSelectableMixin`
      * that dispatches `items-changed` event when rendered items change.
-     * @type {Array<String>}
+     * @type {string[]}
      */
     this._customItems = [];
   }
@@ -430,7 +425,7 @@ export class ApiServerSelector extends AmfHelperMixin(LitElement) {
 
   /**
    * A handler called when slotted number of children change.
-   * It sets `_customNodesCount` proeprty with the number of properties
+   * It sets `_customNodesCount` property with the number of properties
    * and notifies the change.
    */
   _childrenHandler() {
@@ -467,7 +462,7 @@ export class ApiServerSelector extends AmfHelperMixin(LitElement) {
       if (srv) {
         this.value = this._getServerUri(srv);
       } else {
-        srv = this._getExtraServers()[0];
+        [srv] = this._getExtraServers();
         if (srv && this.amf) {
           this.type = 'uri';
           this.value = srv.getAttribute('value');
@@ -522,7 +517,7 @@ export class ApiServerSelector extends AmfHelperMixin(LitElement) {
    * current selection does not exist.
    * This ignores the selection when current type is not a `server`.
    *
-   * @param {Array<Object>} servers List of new servers
+   * @param {any[]} servers List of new servers
    */
   _updateServerSelection(servers) {
     if (!servers) {
@@ -538,9 +533,9 @@ export class ApiServerSelector extends AmfHelperMixin(LitElement) {
   }
 
   /**
-   * @param {Array<Object>} servers List of current servers
-   * @param {String} value The value to look for
-   * @return {Number} The index of found server or -1 if none found.
+   * @param {any[]} servers List of current servers
+   * @param {string} value The value to look for
+   * @return {number} The index of found server or -1 if none found.
    */
   _getServerIndexByUri(servers, value) {
     for (let i = 0; i < servers.length; i++) {
@@ -555,10 +550,7 @@ export class ApiServerSelector extends AmfHelperMixin(LitElement) {
   /**
    * Update component's servers.
    *
-   * @param {Object=} selectedNodeParams The currently selected node parameters to set the servers for
-   * @param {String} selectedNodeParams.id The selected node ID where servers should be fetched
-   * @param {String} selectedNodeParams.type The selected node type where servers should be fetched
-   * @param {String=} selectedNodeParams.endpointId Optional endpoint id the method id belongs to
+   * @param {UpdateServersOptions=} selectedNodeParams The currently selected node parameters to set the servers for
    */
   updateServers({ id, type, endpointId } = {}) {
     let methodId;
@@ -566,28 +558,10 @@ export class ApiServerSelector extends AmfHelperMixin(LitElement) {
       methodId = id;
     }
     if (type === 'endpoint') {
+      // eslint-disable-next-line no-param-reassign
       endpointId = id;
     }
     this.servers = this._getServers({ endpointId, methodId });
-  }
-
-  /**
-   * Checks if an AMF node id corresponds to the provided type
-   * @param {String} id AMF node id
-   * @param {String} type AMF node type
-   * @return {boolean}
-   * @private
-   */
-  _isNodeIdOfType(id, type) {
-    const webApi = this._computeApi(this.amf);
-    if (type === 'method') {
-      return Boolean(this._computeMethodModel(webApi, id));
-    }
-    if (type === 'endpoint') {
-      const endpointModel = this._computeEndpointModel(webApi, id);
-      return Boolean(endpointModel);
-    }
-    return false;
   }
 
   /**
@@ -639,12 +613,12 @@ export class ApiServerSelector extends AmfHelperMixin(LitElement) {
 
   /**
    * Computes the URI of a server.
-   * @param {Object} server Server definition to get the value from.
-   * @return {String} Server base URI.
+   * @param {any} server Server definition to get the value from.
+   * @return {string|undefined} Server base URI.
    */
   _getServerUri(server) {
     const key = this._getAmfKey(this.ns.aml.vocabularies.core.urlTemplate);
-    return this._getValue(server, key);
+    return /** @type string */ (this._getValue(server, key));
   }
 
   /**
@@ -672,11 +646,11 @@ export class ApiServerSelector extends AmfHelperMixin(LitElement) {
       if (slot !== 'custom-base-uri') {
         return;
       }
-      const value = node.getAttribute('value');
-      if (!value) {
+      const v = node.getAttribute('value');
+      if (!v) {
         return;
       }
-      result.push(value);
+      result.push(v);
     });
     this._customItems = result;
   }
@@ -736,7 +710,6 @@ export class ApiServerSelector extends AmfHelperMixin(LitElement) {
         slot="dropdown-content"
         tabindex="-1"
         ?compatibility="${compatibility}"
-        ?outlined="${outlined}"
         attrforselected="value"
         selectable="[value]"
         @items-changed="${this._listboxItemsHandler}"
