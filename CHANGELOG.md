@@ -460,3 +460,20 @@
 * [ci skip] automated merge master->stage. syncing main branches [01b0f24](https://github.com/advanced-rest-client/api-server-selector/commit/01b0f242f096971c2557abac049e3fb1fe61891f) by Ci agent
 
 
+<a name="0.6.3"></a>
+## [0.6.3](https://github.com/advanced-rest-client/api-server-selector/compare/0.6.1...0.6.3) (2021-01-13)
+
+### Build
+
+* bumping version [0642c2c](https://github.com/advanced-rest-client/api-server-selector/commit/0642c2cc3959923b40ef5eab772b8dc09098e77c) by Pawel Psztyc
+
+
+### Update
+
+* updating dependencies and types [dd49b71](https://github.com/advanced-rest-client/api-server-selector/commit/dd49b71921b026204867551522179c6a70bb7570) by Pawel Psztyc
+* [ci skip] automated merge master->stage. syncing main branches [2d5ccd7](https://github.com/advanced-rest-client/api-server-selector/commit/2d5ccd784dd67ebd912b3bb7f39248c3e847a4ca) by Ci agent
+* upgrading types and docs [b800821](https://github.com/advanced-rest-client/api-server-selector/commit/b800821d2d8d9228558d251862e7f088ad58acd1) by Pawel Psztyc
+* updating dependencies [50664d2](https://github.com/advanced-rest-client/api-server-selector/commit/50664d25b5c1c5f90eb30d12e1ccac015edb434d) by Pawel Psztyc
+* [ci skip] automated merge master->stage. syncing main branches [0523423](https://github.com/advanced-rest-client/api-server-selector/commit/052342363d31d243203b031e2ece8db797c18e0c) by Ci agent
+
+
