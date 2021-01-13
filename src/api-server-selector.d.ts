@@ -52,6 +52,9 @@ export declare interface UpdateServersOptions {
  * The items rendered in this slot should be `anypoint-item` components, and have a
  * `value` attribute. This is the value that will be dispatched in the `api-server-changed`
  * event.
+ * 
+ * @fires serverscountchanged
+ * @fires apiserverchanged
  */
 export declare class ApiServerSelector extends AmfHelperMixin(LitElement) {
   /**
