@@ -1,7 +1,6 @@
 [![Published on NPM](https://img.shields.io/npm/v/@api-components/api-server-selector.svg)](https://www.npmjs.com/package/@api-components/api-server-selector)
 
-[![Build Status](https://travis-ci.com/advanced-rest-client/api-server-selector.svg)](https://travis-ci.com/advanced-rest-client/api-server-selector)
-
+[![Tests and publishing](https://github.com/advanced-rest-client/api-server-selector/actions/workflows/deployment.yml/badge.svg)](https://github.com/advanced-rest-client/api-server-selector/actions/workflows/deployment.yml)
 
 ## &lt;api-server-selector&gt;
 

@@ -759,6 +759,7 @@ export class ApiServerSelector extends AmfHelperMixin(LitElement) {
       return html`<anypoint-item
         value="${this._getServerUri(server)}"
         ?compatibility="${compatibility}"
+        data-item="server-dropdown-option"
       >
         ${this._getServerUri(server)}
       </anypoint-item>`;
