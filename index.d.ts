@@ -1,1 +1,2 @@
-export {ApiServerSelector} from './src/api-server-selector';
+export { default as ApiServerSelectorElement } from './src/ApiServerSelectorElement';
+export * from './src/types'

@@ -1,7 +1,7 @@
-import {ApiServerSelector} from './src/api-server-selector';
+import Element from './src/ApiServerSelectorElement';
 
 declare global {
   interface HTMLElementTagNameMap {
-    "api-server-selector": ApiServerSelector;
+    "api-server-selector": Element;
   }
 }

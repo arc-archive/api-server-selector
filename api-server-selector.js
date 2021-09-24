@@ -1,3 +1,3 @@
-import { ApiServerSelector } from './src/api-server-selector.js';
+import Element from './src/ApiServerSelectorElement.js';
 
-window.customElements.define('api-server-selector', ApiServerSelector);
+window.customElements.define('api-server-selector', Element);

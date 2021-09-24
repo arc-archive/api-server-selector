@@ -1,10 +1,10 @@
+# api-server-selector
+
+Custom element that renders a list of servers encoded in an API specification powered by the AMF model.
+
 [![Published on NPM](https://img.shields.io/npm/v/@api-components/api-server-selector.svg)](https://www.npmjs.com/package/@api-components/api-server-selector)
 
 [![Tests and publishing](https://github.com/advanced-rest-client/api-server-selector/actions/workflows/deployment.yml/badge.svg)](https://github.com/advanced-rest-client/api-server-selector/actions/workflows/deployment.yml)
-
-## &lt;api-server-selector&gt;
-
-Custom element that renders a list of servers encoded in an API specification powered by the AMF model.
 
 ## Version compatibility
 
@@ -13,7 +13,8 @@ This version only works with AMF model version 2 (AMF parser >= 4.0.0).
 ## Usage
 
 ### Installation
-```
+
+```ssh
 npm install --save @api-components/api-server-selector
 ```
 
@@ -101,7 +102,7 @@ If the value is missing then the item is rendered but the selector won't react o
 ```html
 <api-server-selector>
   <div slot="custom-base-uri">Other options</div>
-  <anypoint-item slot="custom-base-uri" value="http://mocking.com">Mocking service</anypoint-item>
+  <anypoint-item slot="custom-base-uri" data-value="http://mocking.com">Mocking service</anypoint-item>
   <anypoint-item slot="custom-base-uri"><input type="checkbox"/> Configuration option</anypoint-item>
 </api-server-selector>
 ```
@@ -136,6 +137,7 @@ npm start
 ```
 
 ### Running the tests
+
 ```sh
 npm test
 ```
