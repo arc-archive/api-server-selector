@@ -1,8 +1,10 @@
 import { css } from 'lit-element';
+
 export default css`
 :host{
   display: block;
   width: 100%;
+  margin: 16px 0px;
 }
 
 :host([hidden]) {
@@ -10,9 +12,9 @@ export default css`
 }
 
 .api-server-dropdown, .uri-input {
-  width: calc(100% - 16px);
-  max-width: 700px;
-  min-width: 280px;
+  margin: 0;
+  padding: 0;
+  width: 100%;
 }
 
 .icon {
