@@ -1,4 +1,8 @@
-# api-server-selector
+# DEPRECATED
+
+This component is being deprecated. The code base has been moved to [amf-components](https://github.com/advanced-rest-client/amf-components) module. This module will be archived when [PR 1](https://github.com/advanced-rest-client/amf-components/pull/1) is merged.
+
+-----
 
 Custom element that renders a list of servers encoded in an API specification powered by the AMF model.
 
